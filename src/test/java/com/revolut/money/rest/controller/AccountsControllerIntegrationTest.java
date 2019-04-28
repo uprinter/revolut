@@ -86,7 +86,7 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldReturnErrorStatusIfTransferFailed() {
+    public void shouldReturnErrorIfTransferFailed() {
         // given
         HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
         httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
@@ -184,6 +184,27 @@ public class AccountsControllerIntegrationTest {
         expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
 
         assertThat(result, is(equalTo(initialBalance)));
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldReturnErrorIfGettingBalanceFailed() {
+        // given
+        int accountId = 1;
+        String errorMessage = "message";
+        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + GET_BALANCE_ENDPOINT);
+        given(getBalanceRequestHandler.handle(accountId)).willThrow(new RuntimeException(errorMessage));
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpGetBalanceRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+
+        expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        expectResponeStatus(standardResponse, ResponseStatus.ERROR);
+        expectErrorMessage(standardResponse, errorMessage);
     }
 
     private void expectJsonMimeType(HttpResponse response) {

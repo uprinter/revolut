@@ -25,16 +25,20 @@ public class AccountsController extends Controller {
         get("/accounts/:accountId", (request, response) -> {
             response.type("application/json");
 
-            String stringId = request.params(":accountId");
-            int accountId = Integer.valueOf(stringId);
-            BigDecimal balance = getBalanceRequestHandler.handle(accountId);
+            try {
+                String stringId = request.params(":accountId");
+                int accountId = Integer.valueOf(stringId);
+                BigDecimal balance = getBalanceRequestHandler.handle(accountId);
 
-            StandardResponse standardResponse = StandardResponse.builder()
-                    .status(ResponseStatus.SUCCESS)
-                    .data(new Gson().toJsonTree(balance))
-                    .build();
+                StandardResponse standardResponse = StandardResponse.builder()
+                        .status(ResponseStatus.SUCCESS)
+                        .data(new Gson().toJsonTree(balance))
+                        .build();
 
-            return new Gson().toJson(standardResponse);
+                return new Gson().toJson(standardResponse);
+            } catch (Exception e) {
+                return buildErrorResponse(response, e);
+            }
         });
 
         post("/accounts/transfer", (request, response) -> {

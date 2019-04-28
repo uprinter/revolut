@@ -11,17 +11,29 @@ import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
 @RequiredArgsConstructor
 public class AccountService {
     static final String NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE = "Not enough money at account %s";
+    static final String ACCOUNT_DOES_NOT_EXIST = "Account %s does not exist";
 
     private final DSLContext dslContext;
 
     public BigDecimal getBalance(int accountId) {
-        AccountsRecord accountsRecord = dslContext.fetchOne(ACCOUNTS, ACCOUNTS.ID.eq(accountId));
-        return accountsRecord.getBalance();
+        AccountsRecord accountRecord = dslContext.fetchOne(ACCOUNTS, ACCOUNTS.ID.eq(accountId));
+
+        if (accountRecord != null) {
+            return accountRecord.getBalance();
+        } else {
+            throw new AccountDoesNotExistException(String.format(ACCOUNT_DOES_NOT_EXIST, accountId));
+        }
     }
 
     public void putMoney(int accountId, BigDecimal sum) {
-        dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(sum))
-                .where(ACCOUNTS.ID.eq(accountId)).execute();
+        AccountsRecord accountRecord = dslContext.fetchOne(ACCOUNTS, ACCOUNTS.ID.eq(accountId));
+
+        if (accountRecord != null) {
+            dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(sum))
+                    .where(ACCOUNTS.ID.eq(accountId)).execute();
+        } else {
+            throw new AccountDoesNotExistException(String.format(ACCOUNT_DOES_NOT_EXIST, accountId));
+        }
     }
 
     @Deprecated

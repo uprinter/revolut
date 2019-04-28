@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 
 import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
+import static com.revolut.money.service.AccountService.ACCOUNT_DOES_NOT_EXIST;
 import static com.revolut.money.service.AccountService.NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -23,6 +24,7 @@ public class AccountServiceIntegrationTest {
     private static final int ACCOUNT_ID = 1;
     private static final int FROM_ACCOUNT_ID = 1;
     private static final int TO_ACCOUNT_ID = 2;
+    private static final int NON_EXISTING_ACCOUNT_ID = 100;
 
     private AccountService accountService;
     private DSLContext dslContext;
@@ -128,5 +130,31 @@ public class AccountServiceIntegrationTest {
 
         // then
         assertThat(currentBalance, is(equalTo(initialSum)));
+    }
+
+    @Test
+    public void shouldThrowAccountDoesNotExistExceptionIfGettingBalanceFromNonExistingAccount() {
+        // given
+        dslContext.truncate(ACCOUNTS).execute();
+
+        // expect
+        expectedException.expect(AccountDoesNotExistException.class);
+        expectedException.expectMessage(String.format(ACCOUNT_DOES_NOT_EXIST, NON_EXISTING_ACCOUNT_ID));
+
+        // when
+        accountService.getBalance(NON_EXISTING_ACCOUNT_ID);
+    }
+
+    @Test
+    public void shouldThrowAccountDoesNotExistExceptionIfPuttingMoneyToNonExistingAccount() {
+        // given
+        dslContext.truncate(ACCOUNTS).execute();
+
+        // expect
+        expectedException.expect(AccountDoesNotExistException.class);
+        expectedException.expectMessage(String.format(ACCOUNT_DOES_NOT_EXIST, NON_EXISTING_ACCOUNT_ID));
+
+        // when
+        accountService.putMoney(NON_EXISTING_ACCOUNT_ID, BigDecimal.ONE);
     }
 }
