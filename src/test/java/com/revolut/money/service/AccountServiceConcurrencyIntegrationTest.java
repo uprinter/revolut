@@ -3,7 +3,6 @@ package com.revolut.money.service;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.revolut.money.ApplicationConfiguration;
-import com.revolut.money.util.DataSourceProvider;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -27,6 +26,8 @@ public class AccountServiceConcurrencyIntegrationTest {
     private static final int FROM_ACCOUNT_ID = 1;
     private static final int TO_ACCOUNT_ID = 2;
 
+    private Injector injector = Guice.createInjector(new ApplicationConfiguration());
+
     @Test
     @SneakyThrows
     public void shouldTransferMoneyWithoutLoses() {
@@ -34,7 +35,7 @@ public class AccountServiceConcurrencyIntegrationTest {
         BigDecimal balance = BigDecimal.valueOf(400);
         BigDecimal singleTransferSum = BigDecimal.valueOf(100);
 
-        DataSource dataSource = DataSourceProvider.getDataSource();
+        DataSource dataSource = injector.getInstance(DataSource.class);
 
         // when
         for (int attempt = 0; attempt < 100; attempt++) {
@@ -55,7 +56,7 @@ public class AccountServiceConcurrencyIntegrationTest {
 
             range(0, 14).parallel().forEach(streamIndex -> {
                 try {
-                    Injector injector = Guice.createInjector(new ApplicationConfiguration());
+
                     AccountService accountService = injector.getInstance(AccountService.class);
                     accountService.transferMoney(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, singleTransferSum);
                 } catch (NotEnoughMoneyException e) {

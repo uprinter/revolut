@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.revolut.money.ApplicationConfiguration;
 import com.revolut.money.model.generated.tables.records.AccountsRecord;
-import com.revolut.money.util.DataSourceProvider;
 import lombok.SneakyThrows;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -14,6 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,6 +32,7 @@ public class AccountServiceIntegrationTest {
     private static final int NON_EXISTING_ACCOUNT_ID = 100;
 
     private AccountService accountService;
+    private DataSource dataSource;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,6 +42,7 @@ public class AccountServiceIntegrationTest {
     public void setUp() {
         Injector injector = Guice.createInjector(new ApplicationConfiguration());
         accountService = injector.getInstance(AccountService.class);
+        dataSource = injector.getInstance(DataSource.class);
 
         truncateAccountsTable();
     }
@@ -149,7 +151,7 @@ public class AccountServiceIntegrationTest {
     }
 
     private void truncateAccountsTable() throws SQLException {
-        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
             dslContext.truncate(ACCOUNTS).execute();
             connection.commit();
@@ -162,7 +164,7 @@ public class AccountServiceIntegrationTest {
 
     @SneakyThrows
     private void createAccount(int accountId, BigDecimal initialSum) {
-        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
             dslContext.insertInto(ACCOUNTS)
@@ -175,7 +177,7 @@ public class AccountServiceIntegrationTest {
 
     @SneakyThrows
     private BigDecimal getBalanceOfDefaultAccount() {
-        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
             AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
             return accountsRecord.getBalance();
