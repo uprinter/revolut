@@ -1,7 +1,7 @@
 package com.revolut.money.service;
 
+import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.records.AccountsRecord;
-import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -13,12 +13,16 @@ import java.sql.SQLException;
 
 import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
 
-@RequiredArgsConstructor
 public class AccountService {
     static final String NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE = "Not enough money at account %s";
     static final String ACCOUNT_DOES_NOT_EXIST = "Account %s does not exist";
 
     private final DataSource dataSource;
+
+    @Inject
+    public AccountService(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public BigDecimal getBalance(int accountId) {
         try (Connection connection = dataSource.getConnection()) {

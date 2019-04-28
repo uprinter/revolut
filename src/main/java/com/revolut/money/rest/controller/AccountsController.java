@@ -1,6 +1,7 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 import com.revolut.money.rest.handler.GetBalanceRequestHandler;
 import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
@@ -8,20 +9,25 @@ import com.revolut.money.rest.request.PutRequest;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
-import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
 import static spark.Spark.get;
 import static spark.Spark.post;
 
-@RequiredArgsConstructor
 public class AccountsController extends Controller {
     private final TransferRequestHandler transferRequestHandler;
     private final PutRequestHandler putRequestHandler;
     private final GetBalanceRequestHandler getBalanceRequestHandler;
 
-    public void registerRoutes() {
+    @Inject
+    public AccountsController(TransferRequestHandler transferRequestHandler, PutRequestHandler putRequestHandler, GetBalanceRequestHandler getBalanceRequestHandler) {
+        this.transferRequestHandler = transferRequestHandler;
+        this.putRequestHandler = putRequestHandler;
+        this.getBalanceRequestHandler = getBalanceRequestHandler;
+    }
+
+    public void registerRoutesAndRun() {
         get("/accounts/:accountId", (request, response) -> {
             response.type("application/json");
 

@@ -1,14 +1,18 @@
 package com.revolut.money.rest.handler;
 
+import com.google.inject.Inject;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.service.AccountService;
-import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
-@RequiredArgsConstructor
 public class TransferRequestHandler {
     private final AccountService accountService;
+
+    @Inject
+    public TransferRequestHandler(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     // @todo add validation
     public void handle(TransferRequest transferRequest) {

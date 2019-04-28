@@ -1,5 +1,8 @@
 package com.revolut.money.service;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.revolut.money.ApplicationConfiguration;
 import com.revolut.money.model.generated.tables.records.AccountsRecord;
 import com.revolut.money.util.DataSourceProvider;
 import lombok.SneakyThrows;
@@ -28,7 +31,7 @@ public class AccountServiceIntegrationTest {
     private static final int TO_ACCOUNT_ID = 2;
     private static final int NON_EXISTING_ACCOUNT_ID = 100;
 
-    private AccountService accountService = new AccountService(DataSourceProvider.getDataSource());
+    private AccountService accountService;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -36,6 +39,9 @@ public class AccountServiceIntegrationTest {
     @Before
     @SneakyThrows
     public void setUp() {
+        Injector injector = Guice.createInjector(new ApplicationConfiguration());
+        accountService = injector.getInstance(AccountService.class);
+
         truncateAccountsTable();
     }
 

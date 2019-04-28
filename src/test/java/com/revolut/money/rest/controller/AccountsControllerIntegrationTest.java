@@ -56,7 +56,7 @@ public class AccountsControllerIntegrationTest {
     @Before
     @SneakyThrows
     public void setUp() {
-        accountsController.registerRoutes();
+        accountsController.registerRoutesAndRun();
 
         transferMoneyRequest = TransferRequest.builder().fromAccountId(1).toAccountId(2)
                 .sum(BigDecimal.valueOf(100)).build();

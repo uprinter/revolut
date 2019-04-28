@@ -1,5 +1,8 @@
 package com.revolut.money.service;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.revolut.money.ApplicationConfiguration;
 import com.revolut.money.util.DataSourceProvider;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +55,8 @@ public class AccountServiceConcurrencyIntegrationTest {
 
             range(0, 14).parallel().forEach(streamIndex -> {
                 try {
-                    AccountService accountService = new AccountService(dataSource);
+                    Injector injector = Guice.createInjector(new ApplicationConfiguration());
+                    AccountService accountService = injector.getInstance(AccountService.class);
                     accountService.transferMoney(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, singleTransferSum);
                 } catch (NotEnoughMoneyException e) {
                     log.debug("It's ok");
