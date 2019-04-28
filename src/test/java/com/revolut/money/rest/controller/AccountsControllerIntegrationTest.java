@@ -104,12 +104,10 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldPutMoneySuccessfully() {
+    public void shouldReturnErrorIfTransferMoneyRequestIsInvalid() {
         // given
-        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
-        httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(putMoneyRequest)));
-
-        doAnswer(invocationOnMock -> "ok").when(putRequestHandler).handle(any());
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        httpTransferMoneyRequest.setEntity(new StringEntity("broken_json"));
 
         // when
         HttpResponse response = HttpClientBuilder.create().build().execute(httpTransferMoneyRequest);
@@ -118,8 +116,46 @@ public class AccountsControllerIntegrationTest {
         StandardResponse standardResponse = getStandardResponse(response);
 
         expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        expectResponeStatus(standardResponse, ResponseStatus.ERROR);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldPutMoneySuccessfully() {
+        // given
+        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
+        httpPutMoneyRequest.setEntity(new StringEntity(new Gson().toJson(putMoneyRequest)));
+
+        doAnswer(invocationOnMock -> "ok").when(putRequestHandler).handle(any());
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpPutMoneyRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+
+        expectJsonMimeType(response);
         expectHttpStatus(response, HttpStatus.SC_OK);
         expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldReturnErrorIfPutMoneyRequestIsInvalid() {
+        // given
+        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
+        httpPutMoneyRequest.setEntity(new StringEntity("broken_json"));
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpPutMoneyRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+
+        expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        expectResponeStatus(standardResponse, ResponseStatus.ERROR);
     }
 
     private void expectJsonMimeType(HttpResponse response) {

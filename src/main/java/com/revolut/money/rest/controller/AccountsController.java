@@ -16,9 +16,9 @@ public class AccountsController extends Controller {
     public void registerRoutes() {
         post("/accounts/transfer", ((request, response) -> {
             response.type("application/json");
-            TransferRequest transferRequest = fromRequest(request, TransferRequest.class);
 
             try {
+                TransferRequest transferRequest = fromRequest(request, TransferRequest.class);
                 transferRequestHandler.handle(transferRequest);
                 return buildOkResponse();
             } catch (Exception e) {
@@ -28,9 +28,9 @@ public class AccountsController extends Controller {
 
         post("/accounts/put", ((request, response) -> {
             response.type("application/json");
-            PutRequest putRequest = fromRequest(request, PutRequest.class);
 
             try {
+                PutRequest putRequest = fromRequest(request, PutRequest.class);
                 putRequestHandler.handle(putRequest);
                 return buildOkResponse();
             } catch (Exception e) {
