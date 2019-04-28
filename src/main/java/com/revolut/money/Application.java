@@ -5,23 +5,14 @@ import com.revolut.money.rest.handler.GetBalanceRequestHandler;
 import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
 import com.revolut.money.service.AccountService;
-import com.revolut.money.service.ConnectionFactory;
+import com.revolut.money.util.DataSourceProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 @Slf4j
 public class Application {
     // @todo injection
-    public static void main(String[] args) throws SQLException {
-        Connection connection = ConnectionFactory.getConnection();
-
-        DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
-        AccountService accountService = new AccountService(dslContext);
+    public static void main(String[] args) {
+        AccountService accountService = new AccountService(DataSourceProvider.getDataSource());
         TransferRequestHandler transferRequestHandler = new TransferRequestHandler(accountService);
         GetBalanceRequestHandler getBalanceRequestHandler = new GetBalanceRequestHandler(accountService);
 

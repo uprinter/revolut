@@ -1,10 +1,11 @@
 package com.revolut.money.service;
 
 import com.revolut.money.model.generated.tables.records.AccountsRecord;
+import com.revolut.money.util.DataSourceProvider;
+import lombok.SneakyThrows;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.junit.rules.ExpectedException;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
 import static com.revolut.money.service.AccountService.ACCOUNT_DOES_NOT_EXIST;
@@ -26,68 +28,54 @@ public class AccountServiceIntegrationTest {
     private static final int TO_ACCOUNT_ID = 2;
     private static final int NON_EXISTING_ACCOUNT_ID = 100;
 
-    private AccountService accountService;
-    private DSLContext dslContext;
-    private Connection connection;
+    private AccountService accountService = new AccountService(DataSourceProvider.getDataSource());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
-        connection = ConnectionFactory.getConnection();
-
-        dslContext = DSL.using(connection, SQLDialect.H2);
-        accountService = new AccountService(dslContext);
-
-        dslContext.truncate(ACCOUNTS).execute();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        connection.close();
+    @SneakyThrows
+    public void setUp() {
+        truncateAccountsTable();
     }
 
     @Test
+    @SneakyThrows
     public void shouldPutMoneySuccessfully() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, initialSum).execute();
+        createDefaultAccount(initialSum);
 
         // when
         accountService.putMoney(ACCOUNT_ID, BigDecimal.valueOf(100));
 
         // then
-        AccountsRecord accountsRecord1 = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
-        assertThat(accountsRecord1.getBalance(), is(equalTo(BigDecimal.valueOf(200))));
+        BigDecimal balance = getBalanceOfDefaultAccount();
+        assertThat(balance, is(equalTo(BigDecimal.valueOf(200))));
     }
 
     @Test
+    @SneakyThrows
     public void shouldWithdrawMoneySuccessfully() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, initialSum).execute();
+        createDefaultAccount(initialSum);
 
         // when
         accountService.withdrawMoney(ACCOUNT_ID, BigDecimal.valueOf(50));
 
         // then
-        AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
-        assertThat(accountsRecord.getBalance(), is(equalTo(BigDecimal.valueOf(50))));
+        BigDecimal balance = getBalanceOfDefaultAccount();
+        assertThat(balance, is(equalTo(BigDecimal.valueOf(50))));
     }
 
     @Test
+    @SneakyThrows
     public void shouldThrowNotEnoughMoneyExceptionIfWithdrawingMoreThanCurrentBalance() {
         // given
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, BigDecimal.valueOf(50)).execute();
+        createDefaultAccount(BigDecimal.valueOf(50));
 
         // expect
         expectedException.expect(NotEnoughMoneyException.class);
@@ -98,15 +86,11 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
+    @SneakyThrows
     public void shouldThrowNotEnoughMoneyExceptionIfTransferringMoreThanCurrentBalance() {
         // given
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, FROM_ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, BigDecimal.valueOf(50)).execute();
-
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, TO_ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, BigDecimal.ZERO).execute();
+        createAccount(FROM_ACCOUNT_ID, BigDecimal.valueOf(50));
+        createAccount(TO_ACCOUNT_ID, BigDecimal.ZERO);
 
         // expect
         expectedException.expect(NotEnoughMoneyException.class);
@@ -117,13 +101,11 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
+    @SneakyThrows
     public void shouldReturnCurrentBalance() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
-
-        dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, ACCOUNT_ID)
-                .set(ACCOUNTS.BALANCE, initialSum).execute();
+        createDefaultAccount(initialSum);
 
         // when
         BigDecimal currentBalance = accountService.getBalance(ACCOUNT_ID);
@@ -133,9 +115,10 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
+    @SneakyThrows
     public void shouldThrowAccountDoesNotExistExceptionIfGettingBalanceFromNonExistingAccount() {
         // given
-        dslContext.truncate(ACCOUNTS).execute();
+        truncateAccountsTable();
 
         // expect
         expectedException.expect(AccountDoesNotExistException.class);
@@ -146,9 +129,10 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
+    @SneakyThrows
     public void shouldThrowAccountDoesNotExistExceptionIfPuttingMoneyToNonExistingAccount() {
         // given
-        dslContext.truncate(ACCOUNTS).execute();
+        truncateAccountsTable();
 
         // expect
         expectedException.expect(AccountDoesNotExistException.class);
@@ -156,5 +140,39 @@ public class AccountServiceIntegrationTest {
 
         // when
         accountService.putMoney(NON_EXISTING_ACCOUNT_ID, BigDecimal.ONE);
+    }
+
+    private void truncateAccountsTable() throws SQLException {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            dslContext.truncate(ACCOUNTS).execute();
+            connection.commit();
+        }
+    }
+
+    private void createDefaultAccount(BigDecimal initialSum) {
+        createAccount(ACCOUNT_ID, initialSum);
+    }
+
+    @SneakyThrows
+    private void createAccount(int accountId, BigDecimal initialSum) {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+
+            dslContext.insertInto(ACCOUNTS)
+                    .set(ACCOUNTS.ID, accountId)
+                    .set(ACCOUNTS.BALANCE, initialSum).execute();
+
+            connection.commit();
+        }
+    }
+
+    @SneakyThrows
+    private BigDecimal getBalanceOfDefaultAccount() {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
+            return accountsRecord.getBalance();
+        }
     }
 }
