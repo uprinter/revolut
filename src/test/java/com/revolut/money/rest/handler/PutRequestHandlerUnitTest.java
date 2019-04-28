@@ -1,6 +1,6 @@
 package com.revolut.money.rest.handler;
 
-import com.revolut.money.rest.request.TransferRequest;
+import com.revolut.money.rest.request.PutRequest;
 import com.revolut.money.service.AccountService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,27 +14,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransferRequestHandlerUnitTest {
+public class PutRequestHandlerUnitTest {
     @Mock
     private AccountService accountService;
 
     @InjectMocks
-    private TransferRequestHandler transferRequestHandler;
+    private PutRequestHandler putRequestHandler;
 
     @Test
-    public void shouldHandleTransferMoneyRequest() {
+    public void shouldHandlerPutMoneyRequest() {
         // given
-        int fromAccountId = 1;
-        int toAccountId = 2;
+        int accountId = 1;
         BigDecimal sum = BigDecimal.ONE;
 
-        TransferRequest transferRequest = TransferRequest.builder()
-                .fromAccountId(fromAccountId).toAccountId(toAccountId).sum(sum).build();
+        PutRequest putRequest = PutRequest.builder().accountId(accountId).sum(sum).build();
 
         // when
-        transferRequestHandler.handle(transferRequest);
+        putRequestHandler.handle(putRequest);
 
         // then
-        verify(accountService, times(1)).transferMoney(fromAccountId, toAccountId, sum);
+        verify(accountService, times(1)).putMoney(accountId, sum);
     }
 }

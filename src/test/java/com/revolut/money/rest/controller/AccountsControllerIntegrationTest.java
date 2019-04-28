@@ -1,7 +1,9 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
+import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
+import com.revolut.money.rest.request.PutRequest;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -32,33 +34,42 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsControllerIntegrationTest {
+    private static final String SERVICE_URL = "http://localhost";
+    public static final String TRANSFER_MONEY_ENDPOINT = "/accounts/transfer";
+    public static final String PUT_MONEY_ENDPOINT = "/accounts/put";
+
     private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
+    private static PutRequestHandler putRequestHandler = mock(PutRequestHandler.class);
 
     @InjectMocks
     private AccountsController accountsController;
 
-    private HttpPost httpRequest;
+    private TransferRequest transferMoneyRequest;
+
+    private PutRequest putMoneyRequest;
 
     @Before
     @SneakyThrows
     public void setUp() {
         accountsController.registerRoutes();
 
-        TransferRequest transferRequest = TransferRequest.builder().fromAccountId(1).toAccountId(2)
+        transferMoneyRequest = TransferRequest.builder().fromAccountId(1).toAccountId(2)
                 .sum(BigDecimal.valueOf(100)).build();
 
-        httpRequest = new HttpPost("http://localhost:" + Spark.port() + "/accounts/transfer");
-        httpRequest.setEntity(new StringEntity(new Gson().toJson(transferRequest)));
+        putMoneyRequest = PutRequest.builder().accountId(1).sum(BigDecimal.valueOf(100)).build();
     }
 
     @Test
     @SneakyThrows
     public void shouldReturnOkStatusIfTransferSucceeded() {
         // given
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
+
         doAnswer(invocationOnMock -> "ok").when(transferRequestHandler).handle(any());
 
         // when
-        HttpResponse response = HttpClientBuilder.create().build().execute(httpRequest);
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpTransferMoneyRequest);
 
         // then
         StandardResponse standardResponse = getStandardResponse(response);
@@ -72,13 +83,15 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldReturnErrorStatusIfTransferFailed() {
         // given
-        String errorMessage = "message";
-        RuntimeException runtimeException = new RuntimeException(errorMessage);
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
 
-        doThrow(runtimeException).when(transferRequestHandler).handle(any());
+        String errorMessage = "message";
+
+        doThrow(new RuntimeException(errorMessage)).when(transferRequestHandler).handle(any());
 
         // when
-        HttpResponse response = HttpClientBuilder.create().build().execute(httpRequest);
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpTransferMoneyRequest);
 
         // then
         StandardResponse standardResponse = getStandardResponse(response);
@@ -87,6 +100,26 @@ public class AccountsControllerIntegrationTest {
         expectHttpStatus(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         expectResponeStatus(standardResponse, ResponseStatus.ERROR);
         expectErrorMessage(standardResponse, errorMessage);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldPutMoneySuccessfully() {
+        // given
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
+        httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(putMoneyRequest)));
+
+        doAnswer(invocationOnMock -> "ok").when(putRequestHandler).handle(any());
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpTransferMoneyRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+
+        expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_OK);
+        expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
     }
 
     private void expectJsonMimeType(HttpResponse response) {

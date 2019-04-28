@@ -17,7 +17,6 @@ public class AccountService {
         return accountsRecord.getBalance();
     }
 
-    @Deprecated
     public void putMoney(int accountId, BigDecimal sum) {
         dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(sum))
                 .where(ACCOUNTS.ID.eq(accountId)).execute();
