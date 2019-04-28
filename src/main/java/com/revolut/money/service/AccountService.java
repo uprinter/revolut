@@ -76,11 +76,13 @@ public class AccountService {
         }
     }
 
-    synchronized public void transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
+    public void transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
-            lockForUpdate(fromAccountId, toAccountId);
+            dslContext.select(ACCOUNTS.BALANCE)
+                    .from(ACCOUNTS).where(ACCOUNTS.ID.eq(fromAccountId)).or(ACCOUNTS.ID.eq(toAccountId))
+                    .forUpdate().fetch();
 
             BigDecimal firstAccountBalance = getBalance(fromAccountId);
             BigDecimal secondAccountBalance = getBalance(toAccountId);
@@ -91,22 +93,11 @@ public class AccountService {
 
                 dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(sum))
                         .where(ACCOUNTS.ID.eq(toAccountId)).and(ACCOUNTS.BALANCE.eq(secondAccountBalance)).execute();
+
+                connection.commit();
             } else {
                 throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, fromAccountId));
             }
-
-            connection.commit();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void lockForUpdate(int fromAccountId, int toAccountId) {
-        try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
-
-            dslContext.select(ACCOUNTS.BALANCE)
-                    .from(ACCOUNTS).where(ACCOUNTS.ID.eq(fromAccountId)).or(ACCOUNTS.ID.eq(toAccountId)).forUpdate().fetch();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
