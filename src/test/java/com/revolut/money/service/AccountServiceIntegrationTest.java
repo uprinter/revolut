@@ -14,11 +14,16 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 
 import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
+import static com.revolut.money.service.AccountService.NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AccountServiceIntegrationTest {
+    private static final int ACCOUNT_ID = 1;
+    private static final int FROM_ACCOUNT_ID = 1;
+    private static final int TO_ACCOUNT_ID = 2;
+
     private AccountService accountService;
     private DSLContext dslContext;
     private Connection connection;
@@ -44,36 +49,34 @@ public class AccountServiceIntegrationTest {
     @Test
     public void shouldPutMoneySuccessfully() {
         // given
-        int accountId = 1;
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, accountId)
+                .set(ACCOUNTS.ID, ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, initialSum).execute();
 
         // when
-        accountService.putMoney(accountId, BigDecimal.valueOf(100));
+        accountService.putMoney(ACCOUNT_ID, BigDecimal.valueOf(100));
 
         // then
-        AccountsRecord accountsRecord1 = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(accountId)).fetchOne();
+        AccountsRecord accountsRecord1 = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
         assertThat(accountsRecord1.getBalance(), is(equalTo(BigDecimal.valueOf(200))));
     }
 
     @Test
     public void shouldWithdrawMoneySuccessfully() {
         // given
-        int accountId = 1;
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, accountId)
+                .set(ACCOUNTS.ID, ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, initialSum).execute();
 
         // when
-        accountService.withdrawMoney(accountId, BigDecimal.valueOf(50));
+        accountService.withdrawMoney(ACCOUNT_ID, BigDecimal.valueOf(50));
 
         // then
-        AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(accountId)).fetchOne();
+        AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
         assertThat(accountsRecord.getBalance(), is(equalTo(BigDecimal.valueOf(50))));
     }
 
@@ -81,46 +84,47 @@ public class AccountServiceIntegrationTest {
     public void shouldThrowNotEnoughMoneyExceptionIfWithdrawingMoreThanCurrentBalance() {
         // given
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, 1)
+                .set(ACCOUNTS.ID, ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, BigDecimal.valueOf(50)).execute();
 
         // expect
         expectedException.expect(NotEnoughMoneyException.class);
+        expectedException.expectMessage(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, ACCOUNT_ID));
 
         // when
-        accountService.withdrawMoney(1, BigDecimal.valueOf(100));
+        accountService.withdrawMoney(ACCOUNT_ID, BigDecimal.valueOf(100));
     }
 
     @Test
     public void shouldThrowNotEnoughMoneyExceptionIfTransferringMoreThanCurrentBalance() {
         // given
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, 1)
+                .set(ACCOUNTS.ID, FROM_ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, BigDecimal.valueOf(50)).execute();
 
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, 2)
+                .set(ACCOUNTS.ID, TO_ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, BigDecimal.ZERO).execute();
 
         // expect
         expectedException.expect(NotEnoughMoneyException.class);
+        expectedException.expectMessage(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, FROM_ACCOUNT_ID));
 
         // when
-        accountService.transferMoney(1, 2, BigDecimal.valueOf(100));
+        accountService.transferMoney(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, BigDecimal.valueOf(100));
     }
 
     @Test
     public void shouldReturnCurrentBalance() {
         // given
-        int accountId = 1;
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
         dslContext.insertInto(ACCOUNTS)
-                .set(ACCOUNTS.ID, accountId)
+                .set(ACCOUNTS.ID, ACCOUNT_ID)
                 .set(ACCOUNTS.BALANCE, initialSum).execute();
 
         // when
-        BigDecimal currentBalance = accountService.getCurrentBalance(accountId);
+        BigDecimal currentBalance = accountService.getBalance(ACCOUNT_ID);
 
         // then
         assertThat(currentBalance, is(equalTo(initialSum)));

@@ -10,9 +10,11 @@ import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
 
 @RequiredArgsConstructor
 public class AccountService {
+    static final String NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE = "Not enough money at account %s";
+
     private final DSLContext dslContext;
 
-    public BigDecimal getCurrentBalance(int accountId) {
+    public BigDecimal getBalance(int accountId) {
         AccountsRecord accountsRecord = dslContext.fetchOne(ACCOUNTS, ACCOUNTS.ID.eq(accountId));
         return accountsRecord.getBalance();
     }
@@ -25,21 +27,21 @@ public class AccountService {
     @Deprecated
     // @todo remove and make reliable (select for update)
     public void withdrawMoney(int accountId, BigDecimal sum) {
-        BigDecimal currentBalance = getCurrentBalance(accountId);
+        BigDecimal currentBalance = getBalance(accountId);
 
         if (currentBalance.compareTo(sum) >= 0) {
             dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.subtract(sum))
                     .where(ACCOUNTS.ID.eq(accountId)).and(ACCOUNTS.BALANCE.eq(currentBalance)).execute();
         } else {
-            throw new NotEnoughMoneyException();
+            throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, accountId));
         }
     }
 
     synchronized public void transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
         lockForUpdate(fromAccountId, toAccountId);
 
-        BigDecimal firstAccountBalance = getCurrentBalance(fromAccountId);
-        BigDecimal secondAccountBalance = getCurrentBalance(toAccountId);
+        BigDecimal firstAccountBalance = getBalance(fromAccountId);
+        BigDecimal secondAccountBalance = getBalance(toAccountId);
 
         if (firstAccountBalance.compareTo(sum) >= 0) {
             dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.subtract(sum))
@@ -48,7 +50,7 @@ public class AccountService {
             dslContext.update(ACCOUNTS).set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(sum))
                     .where(ACCOUNTS.ID.eq(toAccountId)).and(ACCOUNTS.BALANCE.eq(secondAccountBalance)).execute();
         } else {
-            throw new NotEnoughMoneyException();
+            throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, fromAccountId));
         }
     }
 

@@ -1,6 +1,7 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
+import com.revolut.money.rest.handler.GetBalanceRequestHandler;
 import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
 import com.revolut.money.rest.request.PutRequest;
@@ -11,6 +12,7 @@ import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -30,16 +32,19 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsControllerIntegrationTest {
     private static final String SERVICE_URL = "http://localhost";
-    public static final String TRANSFER_MONEY_ENDPOINT = "/accounts/transfer";
-    public static final String PUT_MONEY_ENDPOINT = "/accounts/put";
+    private static final String TRANSFER_MONEY_ENDPOINT = "/accounts/transfer";
+    private static final String PUT_MONEY_ENDPOINT = "/accounts/put";
+    private static final String GET_BALANCE_ENDPOINT = "/accounts/1";
 
     private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
     private static PutRequestHandler putRequestHandler = mock(PutRequestHandler.class);
+    private static GetBalanceRequestHandler getBalanceRequestHandler = mock(GetBalanceRequestHandler.class);
 
     @InjectMocks
     private AccountsController accountsController;
@@ -156,6 +161,29 @@ public class AccountsControllerIntegrationTest {
         expectJsonMimeType(response);
         expectHttpStatus(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         expectResponeStatus(standardResponse, ResponseStatus.ERROR);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldReturnAccountBalance() {
+        // given
+        int accountId = 1;
+        BigDecimal initialBalance = BigDecimal.valueOf(100.50);
+        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + GET_BALANCE_ENDPOINT);
+        given(getBalanceRequestHandler.handle(accountId)).willReturn(initialBalance);
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpGetBalanceRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+        BigDecimal result = standardResponse.getData().getAsBigDecimal();
+
+        expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_OK);
+        expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
+
+        assertThat(result, is(equalTo(initialBalance)));
     }
 
     private void expectJsonMimeType(HttpResponse response) {

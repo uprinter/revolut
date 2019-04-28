@@ -1,6 +1,7 @@
 package com.revolut.money;
 
 import com.revolut.money.rest.controller.AccountsController;
+import com.revolut.money.rest.handler.GetBalanceRequestHandler;
 import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
 import com.revolut.money.service.AccountService;
@@ -22,9 +23,10 @@ public class Application {
         DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
         AccountService accountService = new AccountService(dslContext);
         TransferRequestHandler transferRequestHandler = new TransferRequestHandler(accountService);
+        GetBalanceRequestHandler getBalanceRequestHandler = new GetBalanceRequestHandler(accountService);
 
         PutRequestHandler putRequestHandler = new PutRequestHandler(accountService);
-        AccountsController accountsController = new AccountsController(transferRequestHandler, putRequestHandler);
+        AccountsController accountsController = new AccountsController(transferRequestHandler, putRequestHandler, getBalanceRequestHandler);
 
         accountsController.registerRoutes();
     }
