@@ -4,8 +4,7 @@
 package com.revolut.money.model.generated;
 
 
-import com.revolut.money.model.generated.tables.Accounts;
-import com.revolut.money.model.generated.tables.Transactions;
+import com.revolut.money.model.generated.tables.Account;
 import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
@@ -29,7 +28,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1123367933;
+    private static final long serialVersionUID = -1684292945;
 
     /**
      * The reference instance of <code>PUBLIC</code>
@@ -37,14 +36,9 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
-     * The table <code>PUBLIC.ACCOUNTS</code>.
+     * The table <code>PUBLIC.ACCOUNT</code>.
      */
-    public final Accounts ACCOUNTS = Accounts.ACCOUNTS;
-
-    /**
-     * The table <code>PUBLIC.TRANSACTIONS</code>.
-     */
-    public final Transactions TRANSACTIONS = Transactions.TRANSACTIONS;
+    public final Account ACCOUNT = com.revolut.money.model.generated.tables.Account.ACCOUNT;
 
     /**
      * No further instances allowed
@@ -71,7 +65,6 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            Accounts.ACCOUNTS,
-            Transactions.TRANSACTIONS);
+            Account.ACCOUNT);
     }
 }

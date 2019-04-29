@@ -1,7 +1,10 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
-import com.revolut.money.rest.handler.GetBalanceRequestHandler;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.revolut.money.rest.handler.CreateAccountRequestHandler;
+import com.revolut.money.rest.handler.GetAccountRequestHandler;
 import com.revolut.money.rest.handler.PutRequestHandler;
 import com.revolut.money.rest.handler.TransferRequestHandler;
 import com.revolut.money.rest.request.PutRequest;
@@ -38,13 +41,11 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsControllerIntegrationTest {
     private static final String SERVICE_URL = "http://localhost";
-    private static final String TRANSFER_MONEY_ENDPOINT = "/accounts/transfer";
-    private static final String PUT_MONEY_ENDPOINT = "/accounts/put";
-    private static final String GET_BALANCE_ENDPOINT = "/accounts/1";
 
     private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
     private static PutRequestHandler putRequestHandler = mock(PutRequestHandler.class);
-    private static GetBalanceRequestHandler getBalanceRequestHandler = mock(GetBalanceRequestHandler.class);
+    private static GetAccountRequestHandler getAccountRequestHandler = mock(GetAccountRequestHandler.class);
+    private static CreateAccountRequestHandler createAccountRequestHandler = mock(CreateAccountRequestHandler.class);
 
     @InjectMocks
     private AccountsController accountsController;
@@ -68,7 +69,7 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldReturnOkStatusIfTransferSucceeded() {
         // given
-        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/transfer");
         httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
 
         doAnswer(invocationOnMock -> "ok").when(transferRequestHandler).handle(any());
@@ -88,7 +89,7 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldReturnErrorIfTransferFailed() {
         // given
-        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/transfer");
         httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
 
         String errorMessage = "message";
@@ -111,7 +112,7 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldReturnErrorIfTransferMoneyRequestIsInvalid() {
         // given
-        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + TRANSFER_MONEY_ENDPOINT);
+        HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/transfer");
         httpTransferMoneyRequest.setEntity(new StringEntity("broken_json"));
 
         // when
@@ -129,7 +130,7 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldPutMoneySuccessfully() {
         // given
-        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
+        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/put");
         httpPutMoneyRequest.setEntity(new StringEntity(new Gson().toJson(putMoneyRequest)));
 
         doAnswer(invocationOnMock -> "ok").when(putRequestHandler).handle(any());
@@ -149,7 +150,7 @@ public class AccountsControllerIntegrationTest {
     @SneakyThrows
     public void shouldReturnErrorIfPutMoneyRequestIsInvalid() {
         // given
-        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + PUT_MONEY_ENDPOINT);
+        HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/put");
         httpPutMoneyRequest.setEntity(new StringEntity("broken_json"));
 
         // when
@@ -165,25 +166,60 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldReturnAccountBalance() {
+    public void shouldReturnAccount() {
         // given
         int accountId = 1;
         BigDecimal initialBalance = BigDecimal.valueOf(100.50);
-        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + GET_BALANCE_ENDPOINT);
-        given(getBalanceRequestHandler.handle(accountId)).willReturn(initialBalance);
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", accountId);
+        jsonObject.addProperty("balance", initialBalance);
+
+        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + "/accounts/" + accountId);
+
+        given(getAccountRequestHandler.handle(accountId)).willReturn(jsonObject);
 
         // when
         HttpResponse response = HttpClientBuilder.create().build().execute(httpGetBalanceRequest);
 
         // then
         StandardResponse standardResponse = getStandardResponse(response);
-        BigDecimal result = standardResponse.getData().getAsBigDecimal();
+        JsonObject resultJsonObject = standardResponse.getData().getAsJsonObject();
+        Integer id = resultJsonObject.get("id").getAsInt();
+        BigDecimal balance = resultJsonObject.get("balance").getAsBigDecimal();
 
         expectJsonMimeType(response);
         expectHttpStatus(response, HttpStatus.SC_OK);
         expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
 
-        assertThat(result, is(equalTo(initialBalance)));
+        assertThat(id, is(equalTo(accountId)));
+        assertThat(balance, is(equalTo(initialBalance)));
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldCreateAccount() {
+        // given
+        HttpPost httpCreateAccountRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", 1);
+        jsonObject.addProperty("balance", BigDecimal.ZERO);
+
+        given(createAccountRequestHandler.handle()).willReturn(jsonObject);
+
+        // when
+        HttpResponse response = HttpClientBuilder.create().build().execute(httpCreateAccountRequest);
+
+        // then
+        StandardResponse standardResponse = getStandardResponse(response);
+        JsonElement data = standardResponse.getData();
+        JsonObject asJsonObject = data.getAsJsonObject();
+        assertThat(asJsonObject.get("id"), is(equalTo(jsonObject.get("id"))));
+        assertThat(asJsonObject.get("balance"), is(equalTo(jsonObject.get("balance"))));
+
+        expectJsonMimeType(response);
+        expectHttpStatus(response, HttpStatus.SC_OK);
+        expectResponeStatus(standardResponse, ResponseStatus.SUCCESS);
     }
 
     @Test
@@ -192,8 +228,8 @@ public class AccountsControllerIntegrationTest {
         // given
         int accountId = 1;
         String errorMessage = "message";
-        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + GET_BALANCE_ENDPOINT);
-        given(getBalanceRequestHandler.handle(accountId)).willThrow(new RuntimeException(errorMessage));
+        HttpGet httpGetBalanceRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + "/accounts/" + accountId);
+        given(getAccountRequestHandler.handle(accountId)).willThrow(new RuntimeException(errorMessage));
 
         // when
         HttpResponse response = HttpClientBuilder.create().build().execute(httpGetBalanceRequest);

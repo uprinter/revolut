@@ -4,8 +4,7 @@
 package com.revolut.money.model.generated;
 
 
-import com.revolut.money.model.generated.tables.Accounts;
-import com.revolut.money.model.generated.tables.Transactions;
+import com.revolut.money.model.generated.tables.Account;
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
@@ -30,15 +29,13 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
-    public static final Index PRIMARY_KEY_A = Indexes0.PRIMARY_KEY_A;
-    public static final Index PRIMARY_KEY_F = Indexes0.PRIMARY_KEY_F;
+    public static final Index PRIMARY_KEY_E = Indexes0.PRIMARY_KEY_E;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
-        public static Index PRIMARY_KEY_A = Internal.createIndex("PRIMARY_KEY_A", Accounts.ACCOUNTS, new OrderField[] { Accounts.ACCOUNTS.ID }, true);
-        public static Index PRIMARY_KEY_F = Internal.createIndex("PRIMARY_KEY_F", Transactions.TRANSACTIONS, new OrderField[] { Transactions.TRANSACTIONS.ID }, true);
+        public static Index PRIMARY_KEY_E = Internal.createIndex("PRIMARY_KEY_E", Account.ACCOUNT, new OrderField[] { Account.ACCOUNT.ID }, true);
     }
 }

@@ -4,10 +4,8 @@
 package com.revolut.money.model.generated;
 
 
-import com.revolut.money.model.generated.tables.Accounts;
-import com.revolut.money.model.generated.tables.Transactions;
-import com.revolut.money.model.generated.tables.records.AccountsRecord;
-import com.revolut.money.model.generated.tables.records.TransactionsRecord;
+import com.revolut.money.model.generated.tables.Account;
+import com.revolut.money.model.generated.tables.records.AccountRecord;
 import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
@@ -33,14 +31,13 @@ public class Keys {
     // IDENTITY definitions
     // -------------------------------------------------------------------------
 
-    public static final Identity<TransactionsRecord, Integer> IDENTITY_TRANSACTIONS = Identities0.IDENTITY_TRANSACTIONS;
+    public static final Identity<AccountRecord, Integer> IDENTITY_ACCOUNT = Identities0.IDENTITY_ACCOUNT;
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<AccountsRecord> CONSTRAINT_A = UniqueKeys0.CONSTRAINT_A;
-    public static final UniqueKey<TransactionsRecord> CONSTRAINT_F = UniqueKeys0.CONSTRAINT_F;
+    public static final UniqueKey<AccountRecord> CONSTRAINT_E = UniqueKeys0.CONSTRAINT_E;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -52,11 +49,10 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class Identities0 {
-        public static Identity<TransactionsRecord, Integer> IDENTITY_TRANSACTIONS = Internal.createIdentity(Transactions.TRANSACTIONS, Transactions.TRANSACTIONS.ID);
+        public static Identity<AccountRecord, Integer> IDENTITY_ACCOUNT = Internal.createIdentity(Account.ACCOUNT, Account.ACCOUNT.ID);
     }
 
     private static class UniqueKeys0 {
-        public static final UniqueKey<AccountsRecord> CONSTRAINT_A = Internal.createUniqueKey(Accounts.ACCOUNTS, "CONSTRAINT_A", Accounts.ACCOUNTS.ID);
-        public static final UniqueKey<TransactionsRecord> CONSTRAINT_F = Internal.createUniqueKey(Transactions.TRANSACTIONS, "CONSTRAINT_F", Transactions.TRANSACTIONS.ID);
+        public static final UniqueKey<AccountRecord> CONSTRAINT_E = Internal.createUniqueKey(Account.ACCOUNT, "CONSTRAINT_E", Account.ACCOUNT.ID);
     }
 }

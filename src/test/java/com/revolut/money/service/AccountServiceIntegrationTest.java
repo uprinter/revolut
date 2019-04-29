@@ -3,7 +3,8 @@ package com.revolut.money.service;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.revolut.money.ApplicationConfiguration;
-import com.revolut.money.model.generated.tables.records.AccountsRecord;
+import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.model.generated.tables.records.AccountRecord;
 import lombok.SneakyThrows;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -18,12 +19,13 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import static com.revolut.money.model.generated.tables.Accounts.ACCOUNTS;
+import static com.revolut.money.model.generated.tables.Account.ACCOUNT;
 import static com.revolut.money.service.AccountService.ACCOUNT_DOES_NOT_EXIST;
 import static com.revolut.money.service.AccountService.NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 
 public class AccountServiceIntegrationTest {
     private static final int ACCOUNT_ID = 1;
@@ -110,16 +112,31 @@ public class AccountServiceIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldReturnCurrentBalance() {
+    public void shouldReturnAccount() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
         createDefaultAccount(initialSum);
 
         // when
-        BigDecimal currentBalance = accountService.getBalance(ACCOUNT_ID);
+        Account account = accountService.findAccount(ACCOUNT_ID);
 
         // then
-        assertThat(currentBalance, is(equalTo(initialSum)));
+        assertThat(account.getId(), is(equalTo(ACCOUNT_ID)));
+        assertThat(account.getBalance(), is(equalTo(initialSum)));
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldCreateAccount() {
+        // given
+        truncateAccountsTable();
+
+        // when
+        Account account = accountService.createAccount();
+
+        // then
+        assertThat(account.getId(), is(greaterThan(0)));
+        assertThat(account.getBalance(), is(equalTo(BigDecimal.ZERO)));
     }
 
     @Test
@@ -133,7 +150,7 @@ public class AccountServiceIntegrationTest {
         expectedException.expectMessage(String.format(ACCOUNT_DOES_NOT_EXIST, NON_EXISTING_ACCOUNT_ID));
 
         // when
-        accountService.getBalance(NON_EXISTING_ACCOUNT_ID);
+        accountService.findAccount(NON_EXISTING_ACCOUNT_ID);
     }
 
     @Test
@@ -153,8 +170,7 @@ public class AccountServiceIntegrationTest {
     private void truncateAccountsTable() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
-            dslContext.truncate(ACCOUNTS).execute();
-            connection.commit();
+            dslContext.truncate(ACCOUNT).restartIdentity().execute();
         }
     }
 
@@ -167,9 +183,9 @@ public class AccountServiceIntegrationTest {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
-            dslContext.insertInto(ACCOUNTS)
-                    .set(ACCOUNTS.ID, accountId)
-                    .set(ACCOUNTS.BALANCE, initialSum).execute();
+            dslContext.insertInto(ACCOUNT)
+                    .set(ACCOUNT.ID, accountId)
+                    .set(ACCOUNT.BALANCE, initialSum).execute();
 
             connection.commit();
         }
@@ -179,7 +195,7 @@ public class AccountServiceIntegrationTest {
     private BigDecimal getBalanceOfDefaultAccount() {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
-            AccountsRecord accountsRecord = dslContext.selectFrom(ACCOUNTS).where(ACCOUNTS.ID.eq(ACCOUNT_ID)).fetchOne();
+            AccountRecord accountsRecord = dslContext.selectFrom(ACCOUNT).where(ACCOUNT.ID.eq(ACCOUNT_ID)).fetchOne();
             return accountsRecord.getBalance();
         }
     }

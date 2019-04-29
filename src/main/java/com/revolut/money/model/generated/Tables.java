@@ -4,8 +4,7 @@
 package com.revolut.money.model.generated;
 
 
-import com.revolut.money.model.generated.tables.Accounts;
-import com.revolut.money.model.generated.tables.Transactions;
+import com.revolut.money.model.generated.tables.Account;
 
 import javax.annotation.Generated;
 
@@ -24,12 +23,7 @@ import javax.annotation.Generated;
 public class Tables {
 
     /**
-     * The table <code>PUBLIC.ACCOUNTS</code>.
+     * The table <code>PUBLIC.ACCOUNT</code>.
      */
-    public static final Accounts ACCOUNTS = Accounts.ACCOUNTS;
-
-    /**
-     * The table <code>PUBLIC.TRANSACTIONS</code>.
-     */
-    public static final Transactions TRANSACTIONS = Transactions.TRANSACTIONS;
+    public static final Account ACCOUNT = com.revolut.money.model.generated.tables.Account.ACCOUNT;
 }

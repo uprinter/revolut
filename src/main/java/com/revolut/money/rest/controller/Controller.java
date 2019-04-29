@@ -1,6 +1,7 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import org.eclipse.jetty.http.HttpStatus;
@@ -20,6 +21,11 @@ abstract class Controller {
 
     Object buildOkResponse() {
         StandardResponse standardResponse = StandardResponse.builder().status(ResponseStatus.SUCCESS).build();
+        return new Gson().toJson(standardResponse);
+    }
+
+    Object buildOkResponse(JsonElement jsonElement) {
+        StandardResponse standardResponse = StandardResponse.builder().status(ResponseStatus.SUCCESS).data(jsonElement).build();
         return new Gson().toJson(standardResponse);
     }
 }

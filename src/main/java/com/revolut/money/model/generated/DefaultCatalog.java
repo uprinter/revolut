@@ -26,7 +26,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DefaultCatalog extends CatalogImpl {
 
-    private static final long serialVersionUID = 1479578870;
+    private static final long serialVersionUID = -304528698;
 
     /**
      * The reference instance of <code></code>
@@ -36,7 +36,7 @@ public class DefaultCatalog extends CatalogImpl {
     /**
      * The schema <code>PUBLIC</code>.
      */
-    public final Public PUBLIC = Public.PUBLIC;
+    public final Public PUBLIC = com.revolut.money.model.generated.Public.PUBLIC;
 
     /**
      * No further instances allowed

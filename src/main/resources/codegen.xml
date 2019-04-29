@@ -14,9 +14,11 @@
             <excludes></excludes>
             <inputSchema>PUBLIC</inputSchema>
         </database>
-        <generate></generate>
+        <generate>
+            <pojos>true</pojos>
+        </generate>
         <target>
-            <packageName>org.jooq.h2.generated</packageName>
+            <packageName>com.revolut.money.model.generated</packageName>
             <directory>../java</directory>
         </target>
     </generator>
