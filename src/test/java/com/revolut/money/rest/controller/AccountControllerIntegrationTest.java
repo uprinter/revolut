@@ -2,10 +2,7 @@ package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.revolut.money.rest.handler.CreateAccountRequestHandler;
-import com.revolut.money.rest.handler.GetAccountRequestHandler;
-import com.revolut.money.rest.handler.PutRequestHandler;
-import com.revolut.money.rest.handler.TransferRequestHandler;
+import com.revolut.money.rest.handler.*;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -21,7 +18,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
@@ -34,6 +30,7 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -43,6 +40,7 @@ public class AccountControllerIntegrationTest {
 
     private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
     private static PutRequestHandler putRequestHandler = mock(PutRequestHandler.class);
+    private static WithdrawRequestHandler withdrawRequestHandler = mock(WithdrawRequestHandler.class);
     private static GetAccountRequestHandler getAccountRequestHandler = mock(GetAccountRequestHandler.class);
     private static CreateAccountRequestHandler createAccountRequestHandler = mock(CreateAccountRequestHandler.class);
 
@@ -67,7 +65,7 @@ public class AccountControllerIntegrationTest {
         StandardResponse serviceResponse = StandardResponse.builder()
                 .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
 
-        given(transferRequestHandler.handleWithJsonResponse(ArgumentMatchers.any(Request.class), ArgumentMatchers.any(Response.class)))
+        given(transferRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -87,7 +85,7 @@ public class AccountControllerIntegrationTest {
         StandardResponse serviceResponse = StandardResponse.builder()
                 .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
 
-        given(createAccountRequestHandler.handleWithJsonResponse(ArgumentMatchers.any(Request.class), ArgumentMatchers.any(Response.class)))
+        given(createAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -107,7 +105,7 @@ public class AccountControllerIntegrationTest {
         StandardResponse serviceResponse = StandardResponse.builder()
                 .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
 
-        given(getAccountRequestHandler.handleWithJsonResponse(ArgumentMatchers.any(Request.class), ArgumentMatchers.any(Response.class)))
+        given(getAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -118,7 +116,6 @@ public class AccountControllerIntegrationTest {
         expectSuccessResponseStatus(httpResponse);
     }
 
-
     @Test
     @SneakyThrows
     public void shouldHandlePutRequestHandler() {
@@ -127,11 +124,30 @@ public class AccountControllerIntegrationTest {
         StandardResponse serviceResponse = StandardResponse.builder()
                 .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
 
-        given(putRequestHandler.handleWithJsonResponse(ArgumentMatchers.any(Request.class), ArgumentMatchers.any(Response.class)))
+        given(putRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPutMoneyRequest);
+
+        // then
+        expectOkHttpStatus(httpResponse);
+        expectSuccessResponseStatus(httpResponse);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldHandleWithdrawRequestHandler() {
+        // given
+        HttpPost httpWithdrawMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/withdraw");
+        StandardResponse serviceResponse = StandardResponse.builder()
+                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+
+        given(withdrawRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+                .willReturn(serviceResponse);
+
+        // when
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpWithdrawMoneyRequest);
 
         // then
         expectOkHttpStatus(httpResponse);
