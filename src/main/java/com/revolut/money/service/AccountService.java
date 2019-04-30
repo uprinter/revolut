@@ -48,9 +48,7 @@ public class AccountService {
             AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
             if (accountRecord != null) {
-                dslContext.select(ACCOUNT.BALANCE)
-                        .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
-                        .forUpdate().fetchOne();
+                lockAccountForUpdate(accountId, dslContext);
 
                 dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(sum))
                         .where(ACCOUNT.ID.eq(accountId)).execute();
@@ -68,25 +66,41 @@ public class AccountService {
         }
     }
 
-    @Deprecated
-    // @todo remove and make reliable (select for update)
-    public void withdrawMoney(int accountId, BigDecimal sum) {
+    public Account withdrawMoney(int accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
-            BigDecimal currentBalance = findAccount(accountId).getBalance();
+            AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
-            if (currentBalance.compareTo(sum) >= 0) {
-                dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(sum))
-                        .where(ACCOUNT.ID.eq(accountId)).and(ACCOUNT.BALANCE.eq(currentBalance)).execute();
+            if (accountRecord != null) {
+                Account account = accountRecord.into(Account.class);
+                BigDecimal currentBalance = account.getBalance();
+
+                if (currentBalance.compareTo(sum) >= 0) {
+                    lockAccountForUpdate(accountId, dslContext);
+
+                    dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(sum))
+                            .where(ACCOUNT.ID.eq(accountId)).and(ACCOUNT.BALANCE.eq(currentBalance)).execute();
+
+                    Account updatedAccount = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId)).into(Account.class);
+
+                    connection.commit();
+                    return updatedAccount;
+                } else {
+                    throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, accountId));
+                }
             } else {
-                throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, accountId));
+                throw new AccountDoesNotExistException(String.format(ACCOUNT_DOES_NOT_EXIST, accountId));
             }
-
-            connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void lockAccountForUpdate(int accountId, DSLContext dslContext) {
+        dslContext.select(ACCOUNT.BALANCE)
+                .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
+                .forUpdate().fetchOne();
     }
 
     public void transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {

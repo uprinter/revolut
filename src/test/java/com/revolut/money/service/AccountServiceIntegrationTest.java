@@ -67,18 +67,18 @@ public class AccountServiceIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldWithdrawMoneySuccessfully() {
+    public void shouldWithdrawMoneyAndReturnAccountWithUpdatedBalance() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
         createDefaultAccount(initialSum);
 
         // when
-        accountService.withdrawMoney(ACCOUNT_ID, BigDecimal.valueOf(50));
+        Account account = accountService.withdrawMoney(ACCOUNT_ID, BigDecimal.valueOf(50));
 
         // then
-        BigDecimal balance = getBalanceOfDefaultAccount();
-        assertThat(balance, is(equalTo(BigDecimal.valueOf(50))));
+        assertThat(account.getId(), is(equalTo(ACCOUNT_ID)));
+        assertThat(account.getBalance(), is(equalTo(BigDecimal.valueOf(50))));
     }
 
     @Test
@@ -165,6 +165,20 @@ public class AccountServiceIntegrationTest {
 
         // when
         accountService.putMoney(NON_EXISTING_ACCOUNT_ID, BigDecimal.ONE);
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldThrowAccountDoesNotExistExceptionIfWithdrawingMoneyFromNonExistingAccount() {
+        // given
+        truncateAccountsTable();
+
+        // expect
+        expectedException.expect(AccountDoesNotExistException.class);
+        expectedException.expectMessage(String.format(ACCOUNT_DOES_NOT_EXIST, NON_EXISTING_ACCOUNT_ID));
+
+        // when
+        accountService.withdrawMoney(NON_EXISTING_ACCOUNT_ID, BigDecimal.ONE);
     }
 
     private void truncateAccountsTable() throws SQLException {
