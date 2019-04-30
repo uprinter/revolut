@@ -26,7 +26,7 @@ public class AccountController {
     }
 
     public void registerRoutesAndRun() {
-        get("/accounts/:accountId", (request, response) -> {
+        get("/accounts/:id", (request, response) -> {
             StandardResponse standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
             return new Gson().toJsonTree(standardResponse);
         });

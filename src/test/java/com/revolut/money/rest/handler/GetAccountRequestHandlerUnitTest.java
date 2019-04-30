@@ -42,7 +42,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         BigDecimal initialSum = BigDecimal.ONE;
         Account account = new Account(accountId, initialSum);
 
-        given(request.params()).willReturn(singletonMap(":accountId", String.valueOf(accountId)));
+        given(request.params()).willReturn(singletonMap(":id", String.valueOf(accountId)));
         given(accountService.findAccount(accountId)).willReturn(account);
 
         // when
@@ -62,7 +62,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         int accountId = 1;
         String errorMessage = "errorMessage";
 
-        given(request.params()).willReturn(singletonMap(":accountId", String.valueOf(accountId)));
+        given(request.params()).willReturn(singletonMap(":id", String.valueOf(accountId)));
         given(accountService.findAccount(accountId)).willThrow(new RuntimeException(errorMessage));
 
         // when

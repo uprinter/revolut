@@ -19,7 +19,7 @@ public class GetAccountRequestHandler extends RequestHandler<EmptyRequest, Accou
 
     @Override
     protected Optional<Account> handle(EmptyRequest emptyRequest, Map<String, String> params) {
-        String stringAccountId = params.get(":accountId");
+        String stringAccountId = params.get(":id");
         int accountId = Integer.valueOf(stringAccountId);
         Account account = accountService.findAccount(accountId);
         return Optional.of(account);
