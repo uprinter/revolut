@@ -22,14 +22,8 @@ abstract class RequestHandler<T, S> {
         T requestObject = buildRequestObject(request);
         S returnObject = handle(requestObject);
 
-        response.type("application/json");
-
         return buildOkResponse(returnObject);
     }
-
-//    private T parseToRequestObject(Request request, Class<T> clazz) {
-//        return new Gson().fromJson(request.body(), clazz);
-//    }
 
     private StandardResponse<S> buildErrorResponse(Response response, Exception e) {
         response.status(HttpStatus.INTERNAL_SERVER_ERROR_500);

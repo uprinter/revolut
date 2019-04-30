@@ -12,7 +12,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
@@ -161,11 +160,6 @@ public class AccountControllerIntegrationTest {
         // then
         expectOkHttpStatus(httpResponse);
         expectSuccessResponseStatus(httpResponse);
-    }
-
-    private void expectJsonMimeType(HttpResponse response) {
-        HttpEntity httpEntity = response.getEntity();
-        assertThat(ContentType.getOrDefault(httpEntity).getMimeType(), is(equalTo("application/json")));
     }
 
     private void expectOkHttpStatus(HttpResponse response) {
