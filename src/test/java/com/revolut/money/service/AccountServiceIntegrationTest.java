@@ -51,18 +51,18 @@ public class AccountServiceIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldPutMoneySuccessfully() {
+    public void shouldPutMoneyAndReturnAccountWithUpdatedBalance() {
         // given
         BigDecimal initialSum = BigDecimal.valueOf(100);
 
         createDefaultAccount(initialSum);
 
         // when
-        accountService.putMoney(ACCOUNT_ID, BigDecimal.valueOf(100));
+        Account account = accountService.putMoney(ACCOUNT_ID, BigDecimal.valueOf(100));
 
         // then
-        BigDecimal balance = getBalanceOfDefaultAccount();
-        assertThat(balance, is(equalTo(BigDecimal.valueOf(200))));
+        assertThat(account.getId(), is(equalTo(ACCOUNT_ID)));
+        assertThat(account.getBalance(), is(equalTo(BigDecimal.valueOf(200))));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class AccountServiceIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldCreateAccount() {
+    public void shouldCreateAccountAndReturnIt() {
         // given
         truncateAccountsTable();
 

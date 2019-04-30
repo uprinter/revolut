@@ -41,20 +41,28 @@ public class AccountService {
         }
     }
 
-    public void putMoney(int accountId, BigDecimal sum) {
+    public Account putMoney(int accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
             AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
             if (accountRecord != null) {
+                dslContext.select(ACCOUNT.BALANCE)
+                        .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
+                        .forUpdate().fetchOne();
+
                 dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(sum))
                         .where(ACCOUNT.ID.eq(accountId)).execute();
+
+                Account updatedAccount = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId)).into(Account.class);
+
+                connection.commit();
+                return updatedAccount;
             } else {
                 throw new AccountDoesNotExistException(String.format(ACCOUNT_DOES_NOT_EXIST, accountId));
             }
 
-            connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

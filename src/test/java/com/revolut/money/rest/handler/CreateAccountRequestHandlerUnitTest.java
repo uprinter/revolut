@@ -1,14 +1,17 @@
 package com.revolut.money.rest.handler;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.rest.response.ResponseStatus;
+import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import spark.Request;
+import spark.Response;
 
 import java.math.BigDecimal;
 
@@ -18,28 +21,50 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateAccountRequestHandlerUnitTest {
+public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Mock
     private AccountService accountService;
+
+    @Mock
+    private Request request;
+
+    @Mock
+    private Response response;
 
     @InjectMocks
     private CreateAccountRequestHandler createAccountRequestHandler;
 
     @Test
-    public void shouldCreateAccount() {
+    public void shouldReturnResponseWithAccountIdAndBalance() {
         // given
         int accountId = 1;
         BigDecimal initialSum = BigDecimal.ZERO;
         Account account = new Account(accountId, initialSum);
+
         given(accountService.createAccount()).willReturn(account);
 
         // when
-        JsonElement jsonElement = createAccountRequestHandler.handle();
+        StandardResponse standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
 
         // then
-        JsonObject asJsonObject = jsonElement.getAsJsonObject();
+        JsonObject data = standardResponse.getData().getAsJsonObject();
 
-        assertThat(asJsonObject.get("id").getAsInt(), is(equalTo(accountId)));
-        assertThat(asJsonObject.get("balance").getAsBigDecimal(), is(equalTo(initialSum)));
+        assertThat(data.get("id").getAsInt(), is(equalTo(accountId)));
+        assertThat(data.get("balance").getAsBigDecimal(), is(equalTo(initialSum)));
+        expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
+    }
+
+    @Test
+    public void shouldReturnErrorMessageIfCreateAccountRequestHandlerThrowsException() {
+        // given
+        String errorMessage = "errorMessage";
+        given(accountService.createAccount()).willThrow(new RuntimeException(errorMessage));
+
+        // when
+        StandardResponse standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
+
+        // then
+        expectErrorMessage(standardResponse, errorMessage);
+        expectResponseStatus(standardResponse, ResponseStatus.ERROR);
     }
 }

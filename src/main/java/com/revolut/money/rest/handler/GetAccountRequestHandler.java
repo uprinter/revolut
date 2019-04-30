@@ -1,21 +1,27 @@
 package com.revolut.money.rest.handler;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.rest.request.EmptyRequest;
 import com.revolut.money.service.AccountService;
 
-public class GetAccountRequestHandler {
+import java.util.Map;
+import java.util.Optional;
+
+public class GetAccountRequestHandler extends RequestHandler<EmptyRequest, Account> {
     private final AccountService accountService;
 
     @Inject
     public GetAccountRequestHandler(AccountService accountService) {
+        super(EmptyRequest.class);
         this.accountService = accountService;
     }
 
-    public JsonElement handle(int accountId) {
+    @Override
+    protected Optional<Account> handle(EmptyRequest emptyRequest, Map<String, String> params) {
+        String stringAccountId = params.get(":accountId");
+        int accountId = Integer.valueOf(stringAccountId);
         Account account = accountService.findAccount(accountId);
-        return new Gson().toJsonTree(account);
+        return Optional.of(account);
     }
 }
