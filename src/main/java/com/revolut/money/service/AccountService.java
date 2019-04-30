@@ -98,12 +98,6 @@ public class AccountService {
         }
     }
 
-    private void lockAccountForUpdate(int accountId, DSLContext dslContext) {
-        dslContext.select(ACCOUNT.BALANCE)
-                .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
-                .forUpdate().fetchOne();
-    }
-
     public List<Account> transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
@@ -147,5 +141,11 @@ public class AccountService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void lockAccountForUpdate(int accountId, DSLContext dslContext) {
+        dslContext.select(ACCOUNT.BALANCE)
+                .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
+                .forUpdate().fetchOne();
     }
 }

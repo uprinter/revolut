@@ -6,10 +6,11 @@ import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.service.AccountService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class TransferRequestHandler extends RequestHandler<TransferRequest, Account> {
+public class TransferRequestHandler extends RequestHandler<TransferRequest, List<Account>> {
     private final AccountService accountService;
 
     @Inject
@@ -20,13 +21,12 @@ public class TransferRequestHandler extends RequestHandler<TransferRequest, Acco
 
     // @todo add validation
     @Override
-    protected Optional<Account> handle(TransferRequest transferRequest, Map<String, String> params) {
+    protected Optional<List<Account>> handle(TransferRequest transferRequest, Map<String, String> params) {
         int fromAccountId = transferRequest.getFromAccountId();
         int toAccountId = transferRequest.getToAccountId();
         BigDecimal sum = transferRequest.getSum();
 
-        accountService.transferMoney(fromAccountId, toAccountId, sum);
-        // @todo return list of updated accounts
-        return Optional.empty();
+        List<Account> accounts = accountService.transferMoney(fromAccountId, toAccountId, sum);
+        return Optional.of(accounts);
     }
 }
