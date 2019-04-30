@@ -1,9 +1,6 @@
 package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.rest.response.ResponseStatus;
@@ -18,10 +15,13 @@ import spark.Request;
 import spark.Response;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -56,23 +56,20 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
         ));
 
         // when
-        StandardResponse standardResponse = transferRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handleWithJsonResponse(request, response);
 
         // then
-        JsonElement data = standardResponse.getData();
-        JsonArray jsonElements = data.getAsJsonArray();
+        List<Account> accounts = standardResponse.getData();
 
-        JsonObject jsonObjectOne = new JsonObject();
-        jsonObjectOne.addProperty("id", fromAccountId);
-        jsonObjectOne.addProperty("balance", newSumOnAccountOne);
-
-        JsonObject jsonObjectTwo = new JsonObject();
-        jsonObjectTwo.addProperty("id", toAccountId);
-        jsonObjectTwo.addProperty("balance", newSumOnAccountTwo);
-
-        assertThat(jsonElements.size(), is(2));
-        assertThat(jsonElements.contains(jsonObjectOne), is(true));
-        assertThat(jsonElements.contains(jsonObjectTwo), is(true));
+        assertThat(accounts, hasSize(2));
+        assertThat(accounts, hasItem(allOf(
+                hasProperty("id", is(fromAccountId)),
+                hasProperty("balance", is(newSumOnAccountOne))
+        )));
+        assertThat(accounts, hasItem(allOf(
+                hasProperty("id", is(toAccountId)),
+                hasProperty("balance", is(newSumOnAccountTwo))
+        )));
 
         expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
     }

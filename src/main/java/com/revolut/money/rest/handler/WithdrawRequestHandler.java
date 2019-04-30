@@ -1,29 +1,32 @@
 package com.revolut.money.rest.handler;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.request.WithdrawRequest;
 import com.revolut.money.service.AccountService;
+import spark.Request;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Optional;
 
 public class WithdrawRequestHandler extends RequestHandler<WithdrawRequest, Account> {
     private final AccountService accountService;
 
     @Inject
     public WithdrawRequestHandler(AccountService accountService) {
-        super(WithdrawRequest.class);
         this.accountService = accountService;
     }
 
     @Override
-    protected Optional<Account> handle(WithdrawRequest withdrawRequest, Map<String, String> params) {
+    protected WithdrawRequest buildRequestObject(Request request) {
+        return new Gson().fromJson(request.body(), WithdrawRequest.class);
+    }
+
+    @Override
+    protected Account handle(WithdrawRequest withdrawRequest) {
         int accountId = withdrawRequest.getAccountId();
         BigDecimal sum = withdrawRequest.getSum();
 
-        Account account = accountService.withdrawMoney(accountId, sum);
-        return Optional.of(account);
+        return accountService.withdrawMoney(accountId, sum);
     }
 }

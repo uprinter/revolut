@@ -1,7 +1,6 @@
 package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.request.WithdrawRequest;
 import com.revolut.money.rest.response.ResponseStatus;
@@ -49,13 +48,13 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.withdrawMoney(accountId, sumToPut)).willReturn(updatedAccount);
 
         // when
-        StandardResponse standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
 
         // then
-        JsonObject data = standardResponse.getData().getAsJsonObject();
+        Account returnedAccount = standardResponse.getData();
 
-        assertThat(data.get("id").getAsInt(), is(equalTo(accountId)));
-        assertThat(data.get("balance").getAsBigDecimal(), is(equalTo(newSum)));
+        assertThat(returnedAccount.getId(), is(equalTo(accountId)));
+        assertThat(returnedAccount.getBalance(), is(equalTo(newSum)));
         expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
     }
 

@@ -1,29 +1,32 @@
 package com.revolut.money.rest.handler;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.request.PutRequest;
 import com.revolut.money.service.AccountService;
+import spark.Request;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Optional;
 
 public class PutRequestHandler extends RequestHandler<PutRequest, Account> {
     private final AccountService accountService;
 
     @Inject
     public PutRequestHandler(AccountService accountService) {
-        super(PutRequest.class);
         this.accountService = accountService;
     }
 
     @Override
-    protected Optional<Account> handle(PutRequest putRequest, Map<String, String> params) {
+    protected PutRequest buildRequestObject(Request request) {
+        return new Gson().fromJson(request.body(), PutRequest.class);
+    }
+
+    @Override
+    protected Account handle(PutRequest putRequest) {
         int accountId = putRequest.getAccountId();
         BigDecimal sum = putRequest.getSum();
 
-        Account account = accountService.putMoney(accountId, sum);
-        return Optional.of(account);
+        return accountService.putMoney(accountId, sum);
     }
 }

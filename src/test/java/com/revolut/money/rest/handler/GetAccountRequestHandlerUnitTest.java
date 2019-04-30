@@ -1,6 +1,5 @@
 package com.revolut.money.rest.handler;
 
-import com.google.gson.JsonObject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -15,10 +14,10 @@ import spark.Response;
 
 import java.math.BigDecimal;
 
-import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,17 +41,17 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         BigDecimal initialSum = BigDecimal.ONE;
         Account account = new Account(accountId, initialSum);
 
-        given(request.params()).willReturn(singletonMap(":id", String.valueOf(accountId)));
+        given(request.params(eq(":id"))).willReturn(String.valueOf(accountId));
         given(accountService.findAccount(accountId)).willReturn(account);
 
         // when
-        StandardResponse standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
 
         // then
-        JsonObject data = standardResponse.getData().getAsJsonObject();
+        Account returnedAccount = standardResponse.getData();
 
-        assertThat(data.get("id").getAsInt(), is(equalTo(accountId)));
-        assertThat(data.get("balance").getAsBigDecimal(), is(equalTo(initialSum)));
+        assertThat(returnedAccount.getId(), is(equalTo(accountId)));
+        assertThat(returnedAccount.getBalance(), is(equalTo(initialSum)));
         expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
     }
 
@@ -62,11 +61,11 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         int accountId = 1;
         String errorMessage = "errorMessage";
 
-        given(request.params()).willReturn(singletonMap(":id", String.valueOf(accountId)));
+        given(request.params(eq(":id"))).willReturn(String.valueOf(accountId));
         given(accountService.findAccount(accountId)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);

@@ -2,26 +2,28 @@ package com.revolut.money.rest.handler;
 
 import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.pojos.Account;
-import com.revolut.money.rest.request.EmptyRequest;
+import com.revolut.money.rest.request.GetRequest;
 import com.revolut.money.service.AccountService;
+import spark.Request;
 
-import java.util.Map;
-import java.util.Optional;
-
-public class GetAccountRequestHandler extends RequestHandler<EmptyRequest, Account> {
+public class GetAccountRequestHandler extends RequestHandler<GetRequest, Account> {
     private final AccountService accountService;
 
     @Inject
     public GetAccountRequestHandler(AccountService accountService) {
-        super(EmptyRequest.class);
         this.accountService = accountService;
     }
 
     @Override
-    protected Optional<Account> handle(EmptyRequest emptyRequest, Map<String, String> params) {
-        String stringAccountId = params.get(":id");
+    protected GetRequest buildRequestObject(Request request) {
+        String stringAccountId = request.params(":id");
         int accountId = Integer.valueOf(stringAccountId);
-        Account account = accountService.findAccount(accountId);
-        return Optional.of(account);
+        return GetRequest.builder().accountId(accountId).build();
+    }
+
+    @Override
+    protected Account handle(GetRequest getRequest) {
+        int accountId = getRequest.getAccountId();
+        return accountService.findAccount(accountId);
     }
 }

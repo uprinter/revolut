@@ -1,13 +1,12 @@
 package com.revolut.money.rest.response;
 
-import com.google.gson.JsonElement;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Builder
-public class StandardResponse {
+@Setter
+public class StandardResponse<R> {
     private ResponseStatus status;
     private String message;
-    private JsonElement data;
+    private R data;
 }

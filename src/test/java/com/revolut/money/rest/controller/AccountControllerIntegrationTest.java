@@ -1,7 +1,7 @@
 package com.revolut.money.rest.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.handler.*;
 import com.revolut.money.rest.request.TransferRequest;
 import com.revolut.money.rest.response.ResponseStatus;
@@ -26,6 +26,7 @@ import spark.Spark;
 import spark.utils.IOUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -62,8 +63,9 @@ public class AccountControllerIntegrationTest {
         TransferRequest transferMoneyRequest = TransferRequest.builder().build();
         httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
 
-        StandardResponse serviceResponse = StandardResponse.builder()
-                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+        StandardResponse<List<Account>> serviceResponse = new StandardResponse<>();
+        serviceResponse.setStatus(ResponseStatus.SUCCESS);
+        serviceResponse.setMessage("ok");
 
         given(transferRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
@@ -82,8 +84,9 @@ public class AccountControllerIntegrationTest {
         // given
         HttpPost httpCreateAccountRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts");
 
-        StandardResponse serviceResponse = StandardResponse.builder()
-                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+        StandardResponse<Account> serviceResponse = new StandardResponse<>();
+        serviceResponse.setStatus(ResponseStatus.SUCCESS);
+        serviceResponse.setMessage("ok");
 
         given(createAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
@@ -102,8 +105,10 @@ public class AccountControllerIntegrationTest {
         // given
         String accountId = "1";
         HttpGet httpGetAccountRequest = new HttpGet(SERVICE_URL + ":" + Spark.port() + "/accounts/" + accountId);
-        StandardResponse serviceResponse = StandardResponse.builder()
-                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+
+        StandardResponse<Account> serviceResponse = new StandardResponse<>();
+        serviceResponse.setStatus(ResponseStatus.SUCCESS);
+        serviceResponse.setMessage("ok");
 
         given(getAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
@@ -121,8 +126,10 @@ public class AccountControllerIntegrationTest {
     public void shouldHandlePutRequestHandler() {
         // given
         HttpPost httpPutMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/put");
-        StandardResponse serviceResponse = StandardResponse.builder()
-                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+
+        StandardResponse<Account> serviceResponse = new StandardResponse<>();
+        serviceResponse.setStatus(ResponseStatus.SUCCESS);
+        serviceResponse.setMessage("ok");
 
         given(putRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
@@ -140,8 +147,10 @@ public class AccountControllerIntegrationTest {
     public void shouldHandleWithdrawRequestHandler() {
         // given
         HttpPost httpWithdrawMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/withdraw");
-        StandardResponse serviceResponse = StandardResponse.builder()
-                .status(ResponseStatus.SUCCESS).message("ok").data(new JsonObject()).build();
+
+        StandardResponse<Account> serviceResponse = new StandardResponse<>();
+        serviceResponse.setStatus(ResponseStatus.SUCCESS);
+        serviceResponse.setMessage("ok");
 
         given(withdrawRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);

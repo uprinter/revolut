@@ -1,6 +1,5 @@
 package com.revolut.money.rest.handler;
 
-import com.google.gson.JsonObject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -35,7 +34,7 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
     private CreateAccountRequestHandler createAccountRequestHandler;
 
     @Test
-    public void shouldReturnResponseWithAccountIdAndBalance() {
+    public void shouldReturnResponseWithCreatedAccountIdAndBalance() {
         // given
         int accountId = 1;
         BigDecimal initialSum = BigDecimal.ZERO;
@@ -44,13 +43,13 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
         given(accountService.createAccount()).willReturn(account);
 
         // when
-        StandardResponse standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
 
         // then
-        JsonObject data = standardResponse.getData().getAsJsonObject();
+        Account returnedAccount = standardResponse.getData();
 
-        assertThat(data.get("id").getAsInt(), is(equalTo(accountId)));
-        assertThat(data.get("balance").getAsBigDecimal(), is(equalTo(initialSum)));
+        assertThat(returnedAccount.getId(), is(equalTo(accountId)));
+        assertThat(returnedAccount.getBalance(), is(equalTo(initialSum)));
         expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
     }
 
