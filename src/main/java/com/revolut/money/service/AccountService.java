@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import static com.revolut.money.model.generated.tables.Account.ACCOUNT;
 
@@ -103,7 +104,7 @@ public class AccountService {
                 .forUpdate().fetchOne();
     }
 
-    public void transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
+    public List<Account> transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
@@ -121,7 +122,11 @@ public class AccountService {
                 dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(sum))
                         .where(ACCOUNT.ID.eq(toAccountId)).and(ACCOUNT.BALANCE.eq(secondAccountBalance)).execute();
 
+                List<Account> accounts = dslContext.select().from(ACCOUNT).where(ACCOUNT.ID.eq(fromAccountId)).or(ACCOUNT.ID.eq(toAccountId))
+                        .fetchInto(Account.class);
+
                 connection.commit();
+                return accounts;
             } else {
                 throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, fromAccountId));
             }

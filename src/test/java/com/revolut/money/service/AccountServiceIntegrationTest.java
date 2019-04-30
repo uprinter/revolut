@@ -18,14 +18,16 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import static com.revolut.money.model.generated.tables.Account.ACCOUNT;
 import static com.revolut.money.service.AccountService.ACCOUNT_DOES_NOT_EXIST;
 import static com.revolut.money.service.AccountService.NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 public class AccountServiceIntegrationTest {
     private static final int ACCOUNT_ID = 1;
@@ -79,6 +81,28 @@ public class AccountServiceIntegrationTest {
         // then
         assertThat(account.getId(), is(equalTo(ACCOUNT_ID)));
         assertThat(account.getBalance(), is(equalTo(BigDecimal.valueOf(50))));
+    }
+
+    @Test
+    public void shouldTransferMoneyAndReturnListOfUpdatedAccounts() {
+        // given
+        BigDecimal transferSum = BigDecimal.valueOf(100);
+        createAccount(FROM_ACCOUNT_ID, BigDecimal.valueOf(200));
+        createAccount(TO_ACCOUNT_ID, BigDecimal.ZERO);
+
+        // when
+        List<Account> accounts = accountService.transferMoney(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, transferSum);
+
+        // then
+        assertThat(accounts, hasSize(2));
+        assertThat(accounts, hasItem(allOf(
+                hasProperty("id", is(FROM_ACCOUNT_ID)),
+                hasProperty("balance", is(BigDecimal.valueOf(100)))
+        )));
+        assertThat(accounts, hasItem(allOf(
+                hasProperty("id", is(TO_ACCOUNT_ID)),
+                hasProperty("balance", is(BigDecimal.valueOf(100)))
+        )));
     }
 
     @Test
