@@ -7,8 +7,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
-import java.net.URL;
-import java.util.Objects;
 
 public class ApplicationConfiguration extends AbstractModule {
     @Override
@@ -18,9 +16,11 @@ public class ApplicationConfiguration extends AbstractModule {
     @Provides
     @Singleton
     DataSource dataSource() {
-        URL configFile = ApplicationConfiguration.class.getClassLoader().getResource("datasource.properties");
-        String configFilePath = Objects.requireNonNull(configFile).getPath();
-        HikariConfig config = new HikariConfig(configFilePath);
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:h2:mem:myDb;INIT=runscript from 'classpath:create.sql';DB_CLOSE_DELAY=-1");
+        config.setUsername("sa");
+        config.setPassword("");
+        config.setAutoCommit(false);
         return new HikariDataSource(config);
     }
 }
