@@ -13,7 +13,8 @@ public class PutRequestHandler extends RequestHandler<PutRequest, Account> {
     private final AccountService accountService;
 
     @Inject
-    public PutRequestHandler(AccountService accountService) {
+    public PutRequestHandler(AccountService accountService, RequestValidator<PutRequest> requestValidator) {
+        super(requestValidator);
         this.accountService = accountService;
     }
 

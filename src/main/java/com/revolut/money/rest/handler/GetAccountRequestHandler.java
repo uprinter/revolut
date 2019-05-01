@@ -10,11 +10,13 @@ public class GetAccountRequestHandler extends RequestHandler<GetRequest, Account
     private final AccountService accountService;
 
     @Inject
-    public GetAccountRequestHandler(AccountService accountService) {
+    public GetAccountRequestHandler(AccountService accountService, RequestValidator<GetRequest> requestValidator) {
+        super(requestValidator);
         this.accountService = accountService;
     }
 
     @Override
+    // @todo replace int to Integer
     protected GetRequest buildRequestObject(Request request) {
         String stringAccountId = request.params(":id");
         int accountId = Integer.valueOf(stringAccountId);

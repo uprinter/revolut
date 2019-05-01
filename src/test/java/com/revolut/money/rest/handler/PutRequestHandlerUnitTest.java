@@ -14,12 +14,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 import spark.Response;
 
+import javax.validation.ValidationException;
 import java.math.BigDecimal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
@@ -31,6 +34,9 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
     @Mock
     private Response response;
+
+    @Mock
+    private RequestValidator<PutRequest> requestValidator;
 
     @InjectMocks
     private PutRequestHandler putRequestHandler;
@@ -59,7 +65,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
     }
 
     @Test
-    public void shouldReturnErrorMessageIfPutRequestHandlerThrowsException() {
+    public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
         int accountId = 1;
         BigDecimal sumToPut = BigDecimal.ONE;
@@ -74,6 +80,24 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
+        expectResponseStatus(standardResponse, ResponseStatus.ERROR);
+    }
+
+    @Test
+    public void shouldReturnErrorResponseIfRequestIsInvalid() {
+        // given
+        String validationError = "message";
+        PutRequest putRequest = PutRequest.builder().build();
+        ValidationException validationException = new ValidationException(validationError);
+
+        given(request.body()).willReturn(new Gson().toJson(putRequest));
+        doThrow(validationException).when(requestValidator).validate(any(PutRequest.class));
+
+        // when
+        StandardResponse<Account> standardResponse = putRequestHandler.handleWithJsonResponse(request, response);
+
+        // then
+        expectErrorMessage(standardResponse, validationError);
         expectResponseStatus(standardResponse, ResponseStatus.ERROR);
     }
 }

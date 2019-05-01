@@ -7,6 +7,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 public class ApplicationConfiguration extends AbstractModule {
     @Override
@@ -22,5 +24,10 @@ public class ApplicationConfiguration extends AbstractModule {
         config.setPassword("");
         config.setAutoCommit(false);
         return new HikariDataSource(config);
+    }
+
+    @Provides
+    Validator validator() {
+        return Validation.buildDefaultValidatorFactory().getValidator();
     }
 }

@@ -14,7 +14,8 @@ public class TransferRequestHandler extends RequestHandler<TransferRequest, List
     private final AccountService accountService;
 
     @Inject
-    public TransferRequestHandler(AccountService accountService) {
+    public TransferRequestHandler(AccountService accountService, RequestValidator<TransferRequest> requestValidator) {
+        super(requestValidator);
         this.accountService = accountService;
     }
 
@@ -23,7 +24,6 @@ public class TransferRequestHandler extends RequestHandler<TransferRequest, List
         return new Gson().fromJson(request.body(), TransferRequest.class);
     }
 
-    // @todo add validation
     @Override
     protected List<Account> handle(TransferRequest transferRequest) {
         int fromAccountId = transferRequest.getFromAccountId();

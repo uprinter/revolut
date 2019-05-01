@@ -2,6 +2,7 @@ package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.rest.request.PutRequest;
 import com.revolut.money.rest.request.WithdrawRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -14,12 +15,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 import spark.Response;
 
+import javax.validation.ValidationException;
 import java.math.BigDecimal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
@@ -31,6 +35,9 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
     @Mock
     private Response response;
+
+    @Mock
+    private RequestValidator<WithdrawRequest> requestValidator;
 
     @InjectMocks
     private WithdrawRequestHandler withdrawRequestHandler;
@@ -59,7 +66,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
     }
 
     @Test
-    public void shouldReturnErrorMessageIfWithdrawRequestHandlerThrowsException() {
+    public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
         int accountId = 1;
         BigDecimal sumToWithdraw = BigDecimal.ONE;
@@ -77,4 +84,21 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         expectResponseStatus(standardResponse, ResponseStatus.ERROR);
     }
 
+    @Test
+    public void shouldReturnErrorResponseIfRequestIsInvalid() {
+        // given
+        String validationError = "message";
+        PutRequest putRequest = PutRequest.builder().build();
+        ValidationException validationException = new ValidationException(validationError);
+
+        given(request.body()).willReturn(new Gson().toJson(putRequest));
+        doThrow(validationException).when(requestValidator).validate(any(WithdrawRequest.class));
+
+        // when
+        StandardResponse<Account> standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
+
+        // then
+        expectErrorMessage(standardResponse, validationError);
+        expectResponseStatus(standardResponse, ResponseStatus.ERROR);
+    }
 }

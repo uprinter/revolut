@@ -13,7 +13,8 @@ public class WithdrawRequestHandler extends RequestHandler<WithdrawRequest, Acco
     private final AccountService accountService;
 
     @Inject
-    public WithdrawRequestHandler(AccountService accountService) {
+    public WithdrawRequestHandler(AccountService accountService, RequestValidator<WithdrawRequest> requestValidator) {
+        super(requestValidator);
         this.accountService = accountService;
     }
 

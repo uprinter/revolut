@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 import spark.Response;
 
+import javax.validation.ValidationException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,7 +23,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
@@ -34,6 +37,9 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
     @Mock
     private Response response;
+
+    @Mock
+    private RequestValidator<TransferRequest> requestValidator;
 
     @InjectMocks
     private TransferRequestHandler transferRequestHandler;
@@ -72,5 +78,23 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
         )));
 
         expectResponseStatus(standardResponse, ResponseStatus.SUCCESS);
+    }
+
+    @Test
+    public void shouldReturnErrorResponseIfRequestIsInvalid() {
+        // given
+        String validationError = "message";
+        TransferRequest transferRequest = TransferRequest.builder().build();
+        ValidationException validationException = new ValidationException(validationError);
+
+        given(request.body()).willReturn(new Gson().toJson(transferRequest));
+        doThrow(validationException).when(requestValidator).validate(any(TransferRequest.class));
+
+        // when
+        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handleWithJsonResponse(request, response);
+
+        // then
+        expectErrorMessage(standardResponse, validationError);
+        expectResponseStatus(standardResponse, ResponseStatus.ERROR);
     }
 }

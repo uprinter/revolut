@@ -1,6 +1,7 @@
 package com.revolut.money.rest.handler;
 
 import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.rest.request.GetRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
@@ -12,13 +13,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 import spark.Response;
 
+import javax.validation.ValidationException;
 import java.math.BigDecimal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
@@ -30,6 +34,9 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
     @Mock
     private Response response;
+
+    @Mock
+    private RequestValidator<GetRequest> requestValidator;
 
     @InjectMocks
     private GetAccountRequestHandler getAccountRequestHandler;
@@ -56,7 +63,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
     }
 
     @Test
-    public void shouldReturnErrorMessageIfGetAccountRequestHandlerThrowsException() {
+    public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
         int accountId = 1;
         String errorMessage = "errorMessage";
@@ -69,6 +76,23 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
+        expectResponseStatus(standardResponse, ResponseStatus.ERROR);
+    }
+
+    @Test
+    public void shouldReturnErrorResponseIfRequestIsInvalid() {
+        // given
+        String validationError = "message";
+        ValidationException validationException = new ValidationException(validationError);
+
+        given(request.params(eq(":id"))).willReturn("1"); // @todo remove after int -> Integer
+        doThrow(validationException).when(requestValidator).validate(any(GetRequest.class));
+
+        // when
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+
+        // then
+        expectErrorMessage(standardResponse, validationError);
         expectResponseStatus(standardResponse, ResponseStatus.ERROR);
     }
 }

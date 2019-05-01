@@ -7,19 +7,28 @@ import spark.Request;
 import spark.Response;
 
 abstract class RequestHandler<T, S> {
+    private final RequestValidator<T> requestValidator;
+
     protected abstract S handle(T requestBody);
     protected abstract T buildRequestObject(Request request);
 
+    RequestHandler(RequestValidator<T> requestValidator) {
+        this.requestValidator = requestValidator;
+    }
+
     public StandardResponse<S> handleWithJsonResponse(Request request, Response response) {
         try {
-            return handleRequest(request, response);
+            return handleRequest(request);
         } catch (Exception e) {
             return buildErrorResponse(response, e);
         }
     }
 
-    private StandardResponse<S> handleRequest(Request request, Response response) {
+    private StandardResponse<S> handleRequest(Request request) {
         T requestObject = buildRequestObject(request);
+
+        requestValidator.validate(requestObject);
+
         S returnObject = handle(requestObject);
 
         return buildOkResponse(returnObject);

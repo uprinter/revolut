@@ -1,6 +1,7 @@
 package com.revolut.money.rest.handler;
 
 import com.revolut.money.model.generated.tables.pojos.Account;
+import com.revolut.money.rest.request.GetRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
@@ -30,6 +31,9 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
     @Mock
     private Response response;
 
+    @Mock
+    private RequestValidator<GetRequest> requestValidator;
+
     @InjectMocks
     private CreateAccountRequestHandler createAccountRequestHandler;
 
@@ -54,7 +58,7 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
     }
 
     @Test
-    public void shouldReturnErrorMessageIfCreateAccountRequestHandlerThrowsException() {
+    public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
         String errorMessage = "errorMessage";
         given(accountService.createAccount()).willThrow(new RuntimeException(errorMessage));
