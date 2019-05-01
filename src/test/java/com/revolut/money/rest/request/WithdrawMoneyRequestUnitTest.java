@@ -5,18 +5,18 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class WithdrawRequestUnitTest implements AccountIdValidationUnitTest, SumValidationUnitTest {
-    private AccountIdValidator<WithdrawRequest> accountIdValidator = new AccountIdValidator<>() {
+public class WithdrawMoneyRequestUnitTest implements AccountIdValidationUnitTest, SumValidationUnitTest {
+    private AccountIdValidator<WithdrawMoneyRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, WithdrawRequest> buildRequest(Integer accountId) {
-            return Map.of("accountId", WithdrawRequest.builder().accountId(accountId).build());
+        protected Map<String, WithdrawMoneyRequest> buildRequest(Integer accountId) {
+            return Map.of("accountId", WithdrawMoneyRequest.builder().accountId(accountId).build());
         }
     };
 
-    private SumValidator<WithdrawRequest> sumValidator = new SumValidator<>() {
+    private SumValidator<WithdrawMoneyRequest> sumValidator = new SumValidator<>() {
         @Override
-        protected WithdrawRequest buildRequest(BigDecimal sum) {
-            return WithdrawRequest.builder().sum(sum).build();
+        protected WithdrawMoneyRequest buildRequest(BigDecimal sum) {
+            return WithdrawMoneyRequest.builder().sum(sum).build();
         }
     };
 

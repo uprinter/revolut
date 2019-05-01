@@ -3,7 +3,7 @@ package com.revolut.money.rest.handler;
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.request.PutMoneyRequest;
-import com.revolut.money.rest.request.WithdrawRequest;
+import com.revolut.money.rest.request.WithdrawMoneyRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
+public class WithdrawMoneyRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Mock
     private AccountService accountService;
 
@@ -37,10 +37,10 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
     private Response response;
 
     @Mock
-    private RequestValidator<WithdrawRequest> requestValidator;
+    private RequestValidator<WithdrawMoneyRequest> requestValidator;
 
     @InjectMocks
-    private WithdrawRequestHandler withdrawRequestHandler;
+    private WithdrawMoneyRequestHandler withdrawMoneyRequestHandler;
 
     @Test
     public void shouldReturnResponseWithAccountWithUpdatedBalance() {
@@ -49,13 +49,13 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         BigDecimal sumToPut = BigDecimal.ONE;
         BigDecimal newSum = BigDecimal.ONE.add(BigDecimal.valueOf(2));
         Account updatedAccount = new Account(accountId, newSum);
-        WithdrawRequest withdrawRequest = WithdrawRequest.builder().accountId(accountId).sum(sumToPut).build();
+        WithdrawMoneyRequest withdrawMoneyRequest = WithdrawMoneyRequest.builder().accountId(accountId).sum(sumToPut).build();
 
-        given(request.body()).willReturn(new Gson().toJson(withdrawRequest));
+        given(request.body()).willReturn(new Gson().toJson(withdrawMoneyRequest));
         given(accountService.withdrawMoney(accountId, sumToPut)).willReturn(updatedAccount);
 
         // when
-        StandardResponse<Account> standardResponse = withdrawRequestHandler.handle(request, response);
+        StandardResponse<Account> standardResponse = withdrawMoneyRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -71,13 +71,13 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         Integer accountId = 1;
         BigDecimal sumToWithdraw = BigDecimal.ONE;
         String errorMessage = "errorMessage";
-        WithdrawRequest withdrawRequest = WithdrawRequest.builder().accountId(accountId).sum(sumToWithdraw).build();
+        WithdrawMoneyRequest withdrawMoneyRequest = WithdrawMoneyRequest.builder().accountId(accountId).sum(sumToWithdraw).build();
 
-        given(request.body()).willReturn(new Gson().toJson(withdrawRequest));
+        given(request.body()).willReturn(new Gson().toJson(withdrawMoneyRequest));
         given(accountService.withdrawMoney(accountId, sumToWithdraw)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = withdrawRequestHandler.handle(request, response);
+        StandardResponse standardResponse = withdrawMoneyRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
@@ -92,10 +92,10 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         ValidationException validationException = new ValidationException(validationError);
 
         given(request.body()).willReturn(new Gson().toJson(putMoneyRequest));
-        doThrow(validationException).when(requestValidator).validate(any(WithdrawRequest.class));
+        doThrow(validationException).when(requestValidator).validate(any(WithdrawMoneyRequest.class));
 
         // when
-        StandardResponse<Account> standardResponse = withdrawRequestHandler.handle(request, response);
+        StandardResponse<Account> standardResponse = withdrawMoneyRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

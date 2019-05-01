@@ -40,7 +40,7 @@ public class AccountControllerIntegrationTest {
 
     private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
     private static PutMoneyRequestHandler putMoneyRequestHandler = mock(PutMoneyRequestHandler.class);
-    private static WithdrawRequestHandler withdrawRequestHandler = mock(WithdrawRequestHandler.class);
+    private static WithdrawMoneyRequestHandler withdrawMoneyRequestHandler = mock(WithdrawMoneyRequestHandler.class);
     private static GetAccountRequestHandler getAccountRequestHandler = mock(GetAccountRequestHandler.class);
     private static CreateAccountRequestHandler createAccountRequestHandler = mock(CreateAccountRequestHandler.class);
 
@@ -143,7 +143,7 @@ public class AccountControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void shouldHandleWithdrawRequestHandler() {
+    public void shouldHandleWithdrawMoneyRequestHandler() {
         // given
         HttpPost httpWithdrawMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/withdraw");
 
@@ -151,7 +151,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(withdrawRequestHandler.handle(any(Request.class), any(Response.class)))
+        given(withdrawMoneyRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when

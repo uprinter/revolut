@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Getter
-public class WithdrawRequest {
+public class WithdrawMoneyRequest {
     @PositiveAccountId
     private Integer accountId;
 
