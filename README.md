@@ -19,24 +19,25 @@
 * Environment variable JAVA_HOME is configured for Java 11 directory
 
 ## How to build
-mvn clean install
+* Navigate to <project_directory>
+* Run _mvn clean install_
 
 ## How to run
 * Navigate to <project_directory>/target
-* Run java -jar money-1.0-SNAPSHOT-jar-with-dependencies.jar
+* Run _java -jar money-1.0-SNAPSHOT-jar-with-dependencies.jar_
 
 ## How to use
 ### Create account
-curl -d "" http://localhost:4567/accounts
+_curl -d "" http://localhost:4567/accounts_
 
 ### Get account information
-curl http://localhost:4567/accounts/1
+_curl http://localhost:4567/accounts/1_
 
 ### Put money
-curl -d '{"accountId": 1, "sum": 1000}' http://localhost:4567/accounts/put
+_curl -d '{"accountId": 1, "sum": 1000}' http://localhost:4567/accounts/put_
 
 ### Withdraw money
-curl -d '{"accountId": 1, "sum": 1000}' http://localhost:4567/accounts/withdraw
+_curl -d '{"accountId": 1, "sum": 1000}' http://localhost:4567/accounts/withdraw_
 
 ### Transfer money
-curl -d '{"fromAccountId": 1, "toAccountId": 2, "sum": 100}' http://localhost:4567/accounts/transfer
+_curl -d '{"fromAccountId": 1, "toAccountId": 2, "sum": 100}' http://localhost:4567/accounts/transfer_
