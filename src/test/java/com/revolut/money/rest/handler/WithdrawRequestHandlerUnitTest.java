@@ -55,7 +55,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.withdrawMoney(accountId, sumToPut)).willReturn(updatedAccount);
 
         // when
-        StandardResponse<Account> standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = withdrawRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -77,7 +77,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.withdrawMoney(accountId, sumToWithdraw)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse standardResponse = withdrawRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
@@ -95,7 +95,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
         doThrow(validationException).when(requestValidator).validate(any(WithdrawRequest.class));
 
         // when
-        StandardResponse<Account> standardResponse = withdrawRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = withdrawRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

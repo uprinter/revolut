@@ -52,7 +52,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.findAccount(accountId)).willReturn(account);
 
         // when
-        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -72,7 +72,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.findAccount(accountId)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
@@ -89,7 +89,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         doThrow(validationException).when(requestValidator).validate(any(GetRequest.class));
 
         // when
-        StandardResponse<Account> standardResponse = getAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = getAccountRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

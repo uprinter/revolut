@@ -66,7 +66,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(transferRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+        given(transferRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -87,7 +87,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(createAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+        given(createAccountRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -109,7 +109,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(getAccountRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+        given(getAccountRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -130,7 +130,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(putRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+        given(putRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when
@@ -151,7 +151,7 @@ public class AccountControllerIntegrationTest {
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(withdrawRequestHandler.handleWithJsonResponse(any(Request.class), any(Response.class)))
+        given(withdrawRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when

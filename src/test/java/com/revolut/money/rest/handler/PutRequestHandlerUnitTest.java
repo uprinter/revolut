@@ -54,7 +54,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.putMoney(accountId, sumToPut)).willReturn(updatedAccount);
 
         // when
-        StandardResponse<Account> standardResponse = putRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = putRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -76,7 +76,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
         given(accountService.putMoney(accountId, sumToPut)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = putRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse standardResponse = putRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
@@ -94,7 +94,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
         doThrow(validationException).when(requestValidator).validate(any(PutRequest.class));
 
         // when
-        StandardResponse<Account> standardResponse = putRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = putRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

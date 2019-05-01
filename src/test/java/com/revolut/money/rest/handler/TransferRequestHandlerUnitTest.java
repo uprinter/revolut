@@ -62,7 +62,7 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
         ));
 
         // when
-        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handle(request, response);
 
         // then
         List<Account> accounts = standardResponse.getData();
@@ -91,7 +91,7 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
         doThrow(validationException).when(requestValidator).validate(any(TransferRequest.class));
 
         // when
-        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

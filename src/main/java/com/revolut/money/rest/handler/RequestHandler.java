@@ -6,7 +6,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import spark.Request;
 import spark.Response;
 
-abstract class RequestHandler<T, S> {
+public abstract class RequestHandler<T, S> {
     private final RequestValidator<T> requestValidator;
 
     protected abstract S handle(T requestBody);
@@ -16,7 +16,7 @@ abstract class RequestHandler<T, S> {
         this.requestValidator = requestValidator;
     }
 
-    public StandardResponse<S> handleWithJsonResponse(Request request, Response response) {
+    public StandardResponse<S> handle(Request request, Response response) {
         try {
             return handleRequest(request);
         } catch (Exception e) {

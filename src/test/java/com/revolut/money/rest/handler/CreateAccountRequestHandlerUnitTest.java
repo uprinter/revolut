@@ -47,7 +47,7 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
         given(accountService.createAccount()).willReturn(account);
 
         // when
-        StandardResponse<Account> standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse<Account> standardResponse = createAccountRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -64,7 +64,7 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
         given(accountService.createAccount()).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = createAccountRequestHandler.handleWithJsonResponse(request, response);
+        StandardResponse standardResponse = createAccountRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
