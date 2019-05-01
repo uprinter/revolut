@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Getter
-public class PutRequest {
+public class PutMoneyRequest {
     @PositiveAccountId
     private Integer accountId;
 

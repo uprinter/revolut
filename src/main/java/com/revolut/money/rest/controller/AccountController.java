@@ -13,15 +13,15 @@ import static spark.Spark.post;
 
 public class AccountController {
     private final TransferRequestHandler transferRequestHandler;
-    private final PutRequestHandler putRequestHandler;
+    private final PutMoneyRequestHandler putMoneyRequestHandler;
     private final WithdrawRequestHandler withdrawRequestHandler;
     private final CreateAccountRequestHandler createAccountRequestHandler;
     private final GetAccountRequestHandler getAccountRequestHandler;
 
     @Inject
-    public AccountController(TransferRequestHandler transferRequestHandler, PutRequestHandler putRequestHandler, WithdrawRequestHandler withdrawRequestHandler, CreateAccountRequestHandler createAccountRequestHandler, GetAccountRequestHandler getAccountRequestHandler) {
+    public AccountController(TransferRequestHandler transferRequestHandler, PutMoneyRequestHandler putMoneyRequestHandler, WithdrawRequestHandler withdrawRequestHandler, CreateAccountRequestHandler createAccountRequestHandler, GetAccountRequestHandler getAccountRequestHandler) {
         this.transferRequestHandler = transferRequestHandler;
-        this.putRequestHandler = putRequestHandler;
+        this.putMoneyRequestHandler = putMoneyRequestHandler;
         this.withdrawRequestHandler = withdrawRequestHandler;
         this.createAccountRequestHandler = createAccountRequestHandler;
         this.getAccountRequestHandler = getAccountRequestHandler;
@@ -32,7 +32,7 @@ public class AccountController {
 
         post("/accounts/transfer", (request, response) -> handle(transferRequestHandler, request, response));
 
-        post("/accounts/put", (request, response) -> handle(putRequestHandler, request, response));
+        post("/accounts/put", (request, response) -> handle(putMoneyRequestHandler, request, response));
 
         post("/accounts/withdraw", (request, response) -> handle(withdrawRequestHandler, request, response));
 

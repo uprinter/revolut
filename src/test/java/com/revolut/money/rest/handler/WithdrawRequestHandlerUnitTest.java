@@ -2,7 +2,7 @@ package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
-import com.revolut.money.rest.request.PutRequest;
+import com.revolut.money.rest.request.PutMoneyRequest;
 import com.revolut.money.rest.request.WithdrawRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
@@ -88,10 +88,10 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
     public void shouldReturnErrorResponseIfRequestIsInvalid() {
         // given
         String validationError = "message";
-        PutRequest putRequest = PutRequest.builder().build();
+        PutMoneyRequest putMoneyRequest = PutMoneyRequest.builder().build();
         ValidationException validationException = new ValidationException(validationError);
 
-        given(request.body()).willReturn(new Gson().toJson(putRequest));
+        given(request.body()).willReturn(new Gson().toJson(putMoneyRequest));
         doThrow(validationException).when(requestValidator).validate(any(WithdrawRequest.class));
 
         // when

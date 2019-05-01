@@ -2,7 +2,7 @@ package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
-import com.revolut.money.rest.request.PutRequest;
+import com.revolut.money.rest.request.PutMoneyRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
@@ -25,7 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
+public class PutMoneyRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Mock
     private AccountService accountService;
 
@@ -36,10 +36,10 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
     private Response response;
 
     @Mock
-    private RequestValidator<PutRequest> requestValidator;
+    private RequestValidator<PutMoneyRequest> requestValidator;
 
     @InjectMocks
-    private PutRequestHandler putRequestHandler;
+    private PutMoneyRequestHandler putMoneyRequestHandler;
 
     @Test
     public void shouldReturnResponseWithAccountWithAndUpdatedBalance() {
@@ -48,13 +48,13 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
         BigDecimal sumToPut = BigDecimal.ONE;
         BigDecimal newSum = BigDecimal.ONE.add(BigDecimal.valueOf(2));
         Account updatedAccount = new Account(accountId, newSum);
-        PutRequest putRequest = PutRequest.builder().accountId(accountId).sum(sumToPut).build();
+        PutMoneyRequest putMoneyRequest = PutMoneyRequest.builder().accountId(accountId).sum(sumToPut).build();
 
-        given(request.body()).willReturn(new Gson().toJson(putRequest));
+        given(request.body()).willReturn(new Gson().toJson(putMoneyRequest));
         given(accountService.putMoney(accountId, sumToPut)).willReturn(updatedAccount);
 
         // when
-        StandardResponse<Account> standardResponse = putRequestHandler.handle(request, response);
+        StandardResponse<Account> standardResponse = putMoneyRequestHandler.handle(request, response);
 
         // then
         Account returnedAccount = standardResponse.getData();
@@ -70,13 +70,13 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
         Integer accountId = 1;
         BigDecimal sumToPut = BigDecimal.ONE;
         String errorMessage = "errorMessage";
-        PutRequest putRequest = PutRequest.builder().accountId(accountId).sum(sumToPut).build();
+        PutMoneyRequest putMoneyRequest = PutMoneyRequest.builder().accountId(accountId).sum(sumToPut).build();
 
-        given(request.body()).willReturn(new Gson().toJson(putRequest));
+        given(request.body()).willReturn(new Gson().toJson(putMoneyRequest));
         given(accountService.putMoney(accountId, sumToPut)).willThrow(new RuntimeException(errorMessage));
 
         // when
-        StandardResponse standardResponse = putRequestHandler.handle(request, response);
+        StandardResponse standardResponse = putMoneyRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, errorMessage);
@@ -87,14 +87,14 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
     public void shouldReturnErrorResponseIfRequestIsInvalid() {
         // given
         String validationError = "message";
-        PutRequest putRequest = PutRequest.builder().build();
+        PutMoneyRequest putMoneyRequest = PutMoneyRequest.builder().build();
         ValidationException validationException = new ValidationException(validationError);
 
-        given(request.body()).willReturn(new Gson().toJson(putRequest));
-        doThrow(validationException).when(requestValidator).validate(any(PutRequest.class));
+        given(request.body()).willReturn(new Gson().toJson(putMoneyRequest));
+        doThrow(validationException).when(requestValidator).validate(any(PutMoneyRequest.class));
 
         // when
-        StandardResponse<Account> standardResponse = putRequestHandler.handle(request, response);
+        StandardResponse<Account> standardResponse = putMoneyRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);
