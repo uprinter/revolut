@@ -8,6 +8,9 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 public class WithdrawRequest {
+    @PositiveAccountId
     private int accountId;
+
+    @PositiveSum
     private BigDecimal sum;
 }

@@ -8,7 +8,12 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 public class TransferRequest {
+    @PositiveAccountId
     private int fromAccountId;
+
+    @PositiveAccountId
     private int toAccountId;
+
+    @PositiveSum
     private BigDecimal sum;
 }
