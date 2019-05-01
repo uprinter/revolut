@@ -30,10 +30,10 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 public class AccountServiceIntegrationTest {
-    private static final int ACCOUNT_ID = 1;
-    private static final int FROM_ACCOUNT_ID = 1;
-    private static final int TO_ACCOUNT_ID = 2;
-    private static final int NON_EXISTING_ACCOUNT_ID = 100;
+    private static final Integer ACCOUNT_ID = 1;
+    private static final Integer FROM_ACCOUNT_ID = 1;
+    private static final Integer TO_ACCOUNT_ID = 2;
+    private static final Integer NON_EXISTING_ACCOUNT_ID = 100;
 
     private AccountService accountService;
     private DataSource dataSource;
@@ -217,7 +217,7 @@ public class AccountServiceIntegrationTest {
     }
 
     @SneakyThrows
-    private void createAccount(int accountId, BigDecimal initialSum) {
+    private void createAccount(Integer accountId, BigDecimal initialSum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 

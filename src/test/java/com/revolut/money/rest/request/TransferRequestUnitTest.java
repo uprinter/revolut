@@ -8,7 +8,7 @@ import java.util.Map;
 public class TransferRequestUnitTest implements SumValidationUnitTest, AccountIdValidationUnitTest {
     private AccountIdValidator<TransferRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, TransferRequest> buildRequest(int accountId) {
+        protected Map<String, TransferRequest> buildRequest(Integer accountId) {
             return Map.of(
                     "fromAccountId", TransferRequest.builder().fromAccountId(accountId).build(),
                     "toAccountId", TransferRequest.builder().toAccountId(accountId).build()

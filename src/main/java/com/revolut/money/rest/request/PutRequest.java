@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class PutRequest {
     @PositiveAccountId
-    private int accountId;
+    private Integer accountId;
 
     @PositiveSum
     private BigDecimal sum;

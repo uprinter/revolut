@@ -45,7 +45,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnResponseWithAccountWithUpdatedBalance() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal sumToPut = BigDecimal.ONE;
         BigDecimal newSum = BigDecimal.ONE.add(BigDecimal.valueOf(2));
         Account updatedAccount = new Account(accountId, newSum);
@@ -68,7 +68,7 @@ public class WithdrawRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal sumToWithdraw = BigDecimal.ONE;
         String errorMessage = "errorMessage";
         WithdrawRequest withdrawRequest = WithdrawRequest.builder().accountId(accountId).sum(sumToWithdraw).build();

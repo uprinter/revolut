@@ -10,10 +10,10 @@ import java.math.BigDecimal;
 // @todo add validation for transfer to the same account
 public class TransferRequest {
     @PositiveAccountId
-    private int fromAccountId;
+    private Integer fromAccountId;
 
     @PositiveAccountId
-    private int toAccountId;
+    private Integer toAccountId;
 
     @PositiveSum
     private BigDecimal sum;

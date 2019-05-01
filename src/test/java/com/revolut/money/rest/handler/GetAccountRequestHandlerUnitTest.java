@@ -44,7 +44,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnResponseWithAccountIdAndBalance() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal initialSum = BigDecimal.ONE;
         Account account = new Account(accountId, initialSum);
 
@@ -65,7 +65,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         String errorMessage = "errorMessage";
 
         given(request.params(eq(":id"))).willReturn(String.valueOf(accountId));
@@ -85,7 +85,7 @@ public class GetAccountRequestHandlerUnitTest extends RequestHandlerUnitTest {
         String validationError = "message";
         ValidationException validationException = new ValidationException(validationError);
 
-        given(request.params(eq(":id"))).willReturn("1"); // @todo remove after int -> Integer
+        given(request.params(eq(":id"))).willReturn("1");
         doThrow(validationException).when(requestValidator).validate(any(GetRequest.class));
 
         // when

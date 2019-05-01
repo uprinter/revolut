@@ -47,8 +47,8 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnResponseWithUpdatedAccounts() {
         // given
-        int fromAccountId = 1;
-        int toAccountId = 2;
+        Integer fromAccountId = 1;
+        Integer toAccountId = 2;
         BigDecimal transferSum = BigDecimal.ONE;
         BigDecimal newSumOnAccountOne = BigDecimal.ONE;
         BigDecimal newSumOnAccountTwo = BigDecimal.TEN;

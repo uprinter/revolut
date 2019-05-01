@@ -40,7 +40,7 @@ public class CreateAccountRequestHandlerUnitTest extends RequestHandlerUnitTest 
     @Test
     public void shouldReturnResponseWithCreatedAccountIdAndBalance() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal initialSum = BigDecimal.ZERO;
         Account account = new Account(accountId, initialSum);
 

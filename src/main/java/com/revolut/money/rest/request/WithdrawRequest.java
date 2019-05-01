@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class WithdrawRequest {
     @PositiveAccountId
-    private int accountId;
+    private Integer accountId;
 
     @PositiveSum
     private BigDecimal sum;

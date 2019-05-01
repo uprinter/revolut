@@ -16,16 +16,15 @@ public class GetAccountRequestHandler extends RequestHandler<GetRequest, Account
     }
 
     @Override
-    // @todo replace int to Integer
     protected GetRequest buildRequestObject(Request request) {
         String stringAccountId = request.params(":id");
-        int accountId = Integer.valueOf(stringAccountId);
+        Integer accountId = Integer.valueOf(stringAccountId);
         return GetRequest.builder().accountId(accountId).build();
     }
 
     @Override
     protected Account handle(GetRequest getRequest) {
-        int accountId = getRequest.getAccountId();
+        Integer accountId = getRequest.getAccountId();
         return accountService.findAccount(accountId);
     }
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 public class PutRequestUnitTest implements AccountIdValidationUnitTest, SumValidationUnitTest {
     private AccountIdValidator<PutRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, PutRequest> buildRequest(int accountId) {
+        protected Map<String, PutRequest> buildRequest(Integer accountId) {
             return Map.of("accountId", PutRequest.builder().accountId(accountId).build());
         }
     };

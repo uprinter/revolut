@@ -44,7 +44,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnResponseWithAccountWithAndUpdatedBalance() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal sumToPut = BigDecimal.ONE;
         BigDecimal newSum = BigDecimal.ONE.add(BigDecimal.valueOf(2));
         Account updatedAccount = new Account(accountId, newSum);
@@ -67,7 +67,7 @@ public class PutRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Test
     public void shouldReturnErrorResponseIfAccountServiceThrowsException() {
         // given
-        int accountId = 1;
+        Integer accountId = 1;
         BigDecimal sumToPut = BigDecimal.ONE;
         String errorMessage = "errorMessage";
         PutRequest putRequest = PutRequest.builder().accountId(accountId).sum(sumToPut).build();

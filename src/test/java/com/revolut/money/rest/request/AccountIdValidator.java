@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.*;
 public abstract class AccountIdValidator<T> {
     private Validator validator = buildDefaultValidatorFactory().getValidator();
 
-    protected abstract Map<String, T> buildRequest(int accountId);
+    protected abstract Map<String, T> buildRequest(Integer accountId);
 
     void shouldBeValidIfAccountIdIsPositive() {
         Map<String, T> requests = buildRequest(1);

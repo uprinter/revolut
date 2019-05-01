@@ -25,8 +25,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @Slf4j
 @Ignore
 public class AccountServiceConcurrencyIntegrationTest {
-    private static final int FROM_ACCOUNT_ID = 1;
-    private static final int TO_ACCOUNT_ID = 2;
+    private static final Integer FROM_ACCOUNT_ID = 1;
+    private static final Integer TO_ACCOUNT_ID = 2;
 
     private Injector injector = Guice.createInjector(new ApplicationConfiguration());
 

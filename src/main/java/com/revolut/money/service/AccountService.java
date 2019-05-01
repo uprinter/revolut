@@ -26,7 +26,7 @@ public class AccountService {
         this.dataSource = dataSource;
     }
 
-    public Account findAccount(int accountId) {
+    public Account findAccount(Integer accountId) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
@@ -42,7 +42,7 @@ public class AccountService {
         }
     }
 
-    public Account putMoney(int accountId, BigDecimal sum) {
+    public Account putMoney(Integer accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
@@ -67,7 +67,7 @@ public class AccountService {
         }
     }
 
-    public Account withdrawMoney(int accountId, BigDecimal sum) {
+    public Account withdrawMoney(Integer accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
@@ -98,7 +98,7 @@ public class AccountService {
         }
     }
 
-    public List<Account> transferMoney(int fromAccountId, int toAccountId, BigDecimal sum) {
+    public List<Account> transferMoney(Integer fromAccountId, Integer toAccountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
             DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
 
@@ -143,7 +143,7 @@ public class AccountService {
         }
     }
 
-    private void lockAccountForUpdate(int accountId, DSLContext dslContext) {
+    private void lockAccountForUpdate(Integer accountId, DSLContext dslContext) {
         dslContext.select(ACCOUNT.BALANCE)
                 .from(ACCOUNT).where(ACCOUNT.ID.eq(accountId))
                 .forUpdate().fetchOne();

@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 public class GetRequest {
     @PositiveAccountId
-    private int accountId;
+    private Integer accountId;
 }

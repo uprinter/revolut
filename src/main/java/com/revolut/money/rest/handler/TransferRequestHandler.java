@@ -26,8 +26,8 @@ public class TransferRequestHandler extends RequestHandler<TransferRequest, List
 
     @Override
     protected List<Account> handle(TransferRequest transferRequest) {
-        int fromAccountId = transferRequest.getFromAccountId();
-        int toAccountId = transferRequest.getToAccountId();
+        Integer fromAccountId = transferRequest.getFromAccountId();
+        Integer toAccountId = transferRequest.getToAccountId();
         BigDecimal sum = transferRequest.getSum();
 
         return accountService.transferMoney(fromAccountId, toAccountId, sum);

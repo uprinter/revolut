@@ -25,7 +25,7 @@ public class PutRequestHandler extends RequestHandler<PutRequest, Account> {
 
     @Override
     protected Account handle(PutRequest putRequest) {
-        int accountId = putRequest.getAccountId();
+        Integer accountId = putRequest.getAccountId();
         BigDecimal sum = putRequest.getSum();
 
         return accountService.putMoney(accountId, sum);

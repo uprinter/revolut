@@ -7,7 +7,7 @@ import java.util.Map;
 public class GetRequestUnitTest implements AccountIdValidationUnitTest {
     private AccountIdValidator<GetRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, GetRequest> buildRequest(int accountId) {
+        protected Map<String, GetRequest> buildRequest(Integer accountId) {
             return Map.of("accountId", GetRequest.builder().accountId(accountId).build());
         }
     };

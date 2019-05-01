@@ -8,7 +8,7 @@ import java.util.Map;
 public class WithdrawRequestUnitTest implements AccountIdValidationUnitTest, SumValidationUnitTest {
     private AccountIdValidator<WithdrawRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, WithdrawRequest> buildRequest(int accountId) {
+        protected Map<String, WithdrawRequest> buildRequest(Integer accountId) {
             return Map.of("accountId", WithdrawRequest.builder().accountId(accountId).build());
         }
     };

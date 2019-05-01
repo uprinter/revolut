@@ -25,7 +25,7 @@ public class WithdrawRequestHandler extends RequestHandler<WithdrawRequest, Acco
 
     @Override
     protected Account handle(WithdrawRequest withdrawRequest) {
-        int accountId = withdrawRequest.getAccountId();
+        Integer accountId = withdrawRequest.getAccountId();
         BigDecimal sum = withdrawRequest.getSum();
 
         return accountService.withdrawMoney(accountId, sum);
