@@ -2,7 +2,7 @@ package com.revolut.money.rest.handler;
 
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
-import com.revolut.money.rest.request.TransferRequest;
+import com.revolut.money.rest.request.TransferMoneyRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import com.revolut.money.service.AccountService;
@@ -28,7 +28,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
+public class TransferMoneyRequestHandlerUnitTest extends RequestHandlerUnitTest {
     @Mock
     private AccountService accountService;
 
@@ -39,10 +39,10 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
     private Response response;
 
     @Mock
-    private RequestValidator<TransferRequest> requestValidator;
+    private RequestValidator<TransferMoneyRequest> requestValidator;
 
     @InjectMocks
-    private TransferRequestHandler transferRequestHandler;
+    private TransferMoneyRequestHandler transferMoneyRequestHandler;
 
     @Test
     public void shouldReturnResponseWithUpdatedAccounts() {
@@ -52,17 +52,17 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
         BigDecimal transferSum = BigDecimal.ONE;
         BigDecimal newSumOnAccountOne = BigDecimal.ONE;
         BigDecimal newSumOnAccountTwo = BigDecimal.TEN;
-        TransferRequest transferRequest = TransferRequest.builder()
+        TransferMoneyRequest transferMoneyRequest = TransferMoneyRequest.builder()
                 .fromAccountId(fromAccountId).toAccountId(toAccountId).sum(transferSum).build();
 
-        given(request.body()).willReturn(new Gson().toJson(transferRequest));
+        given(request.body()).willReturn(new Gson().toJson(transferMoneyRequest));
         given(accountService.transferMoney(fromAccountId, toAccountId, transferSum)).willReturn(asList(
                 new Account(fromAccountId, newSumOnAccountOne),
                 new Account(toAccountId, newSumOnAccountTwo)
         ));
 
         // when
-        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handle(request, response);
+        StandardResponse<List<Account>> standardResponse = transferMoneyRequestHandler.handle(request, response);
 
         // then
         List<Account> accounts = standardResponse.getData();
@@ -84,14 +84,14 @@ public class TransferRequestHandlerUnitTest extends RequestHandlerUnitTest {
     public void shouldReturnErrorResponseIfRequestIsInvalid() {
         // given
         String validationError = "message";
-        TransferRequest transferRequest = TransferRequest.builder().build();
+        TransferMoneyRequest transferMoneyRequest = TransferMoneyRequest.builder().build();
         ValidationException validationException = new ValidationException(validationError);
 
-        given(request.body()).willReturn(new Gson().toJson(transferRequest));
-        doThrow(validationException).when(requestValidator).validate(any(TransferRequest.class));
+        given(request.body()).willReturn(new Gson().toJson(transferMoneyRequest));
+        doThrow(validationException).when(requestValidator).validate(any(TransferMoneyRequest.class));
 
         // when
-        StandardResponse<List<Account>> standardResponse = transferRequestHandler.handle(request, response);
+        StandardResponse<List<Account>> standardResponse = transferMoneyRequestHandler.handle(request, response);
 
         // then
         expectErrorMessage(standardResponse, validationError);

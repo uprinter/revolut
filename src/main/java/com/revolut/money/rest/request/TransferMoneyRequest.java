@@ -7,8 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Getter
-// @todo add validation for transfer to the same account
-public class TransferRequest {
+public class TransferMoneyRequest {
     @PositiveAccountId
     private Integer fromAccountId;
 

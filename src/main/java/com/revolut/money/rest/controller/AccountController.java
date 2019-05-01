@@ -12,15 +12,15 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 
 public class AccountController {
-    private final TransferRequestHandler transferRequestHandler;
+    private final TransferMoneyRequestHandler transferMoneyRequestHandler;
     private final PutMoneyRequestHandler putMoneyRequestHandler;
     private final WithdrawMoneyRequestHandler withdrawMoneyRequestHandler;
     private final CreateAccountRequestHandler createAccountRequestHandler;
     private final GetAccountRequestHandler getAccountRequestHandler;
 
     @Inject
-    public AccountController(TransferRequestHandler transferRequestHandler, PutMoneyRequestHandler putMoneyRequestHandler, WithdrawMoneyRequestHandler withdrawMoneyRequestHandler, CreateAccountRequestHandler createAccountRequestHandler, GetAccountRequestHandler getAccountRequestHandler) {
-        this.transferRequestHandler = transferRequestHandler;
+    public AccountController(TransferMoneyRequestHandler transferMoneyRequestHandler, PutMoneyRequestHandler putMoneyRequestHandler, WithdrawMoneyRequestHandler withdrawMoneyRequestHandler, CreateAccountRequestHandler createAccountRequestHandler, GetAccountRequestHandler getAccountRequestHandler) {
+        this.transferMoneyRequestHandler = transferMoneyRequestHandler;
         this.putMoneyRequestHandler = putMoneyRequestHandler;
         this.withdrawMoneyRequestHandler = withdrawMoneyRequestHandler;
         this.createAccountRequestHandler = createAccountRequestHandler;
@@ -30,7 +30,7 @@ public class AccountController {
     public void registerRoutesAndRun() {
         get("/accounts/:id", (request, response) -> handle(getAccountRequestHandler, request, response));
 
-        post("/accounts/transfer", (request, response) -> handle(transferRequestHandler, request, response));
+        post("/accounts/transfer", (request, response) -> handle(transferMoneyRequestHandler, request, response));
 
         post("/accounts/put", (request, response) -> handle(putMoneyRequestHandler, request, response));
 

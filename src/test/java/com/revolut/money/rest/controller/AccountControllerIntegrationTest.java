@@ -3,7 +3,7 @@ package com.revolut.money.rest.controller;
 import com.google.gson.Gson;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.rest.handler.*;
-import com.revolut.money.rest.request.TransferRequest;
+import com.revolut.money.rest.request.TransferMoneyRequest;
 import com.revolut.money.rest.response.ResponseStatus;
 import com.revolut.money.rest.response.StandardResponse;
 import lombok.SneakyThrows;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 public class AccountControllerIntegrationTest {
     private static final String SERVICE_URL = "http://localhost";
 
-    private static TransferRequestHandler transferRequestHandler = mock(TransferRequestHandler.class);
+    private static TransferMoneyRequestHandler transferMoneyRequestHandler = mock(TransferMoneyRequestHandler.class);
     private static PutMoneyRequestHandler putMoneyRequestHandler = mock(PutMoneyRequestHandler.class);
     private static WithdrawMoneyRequestHandler withdrawMoneyRequestHandler = mock(WithdrawMoneyRequestHandler.class);
     private static GetAccountRequestHandler getAccountRequestHandler = mock(GetAccountRequestHandler.class);
@@ -59,14 +59,14 @@ public class AccountControllerIntegrationTest {
         // given
         HttpPost httpTransferMoneyRequest = new HttpPost(SERVICE_URL + ":" + Spark.port() + "/accounts/transfer");
 
-        TransferRequest transferMoneyRequest = TransferRequest.builder().build();
+        TransferMoneyRequest transferMoneyRequest = TransferMoneyRequest.builder().build();
         httpTransferMoneyRequest.setEntity(new StringEntity(new Gson().toJson(transferMoneyRequest)));
 
         StandardResponse<List<Account>> serviceResponse = new StandardResponse<>();
         serviceResponse.setStatus(ResponseStatus.SUCCESS);
         serviceResponse.setMessage("ok");
 
-        given(transferRequestHandler.handle(any(Request.class), any(Response.class)))
+        given(transferMoneyRequestHandler.handle(any(Request.class), any(Response.class)))
                 .willReturn(serviceResponse);
 
         // when

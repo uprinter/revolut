@@ -5,21 +5,21 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class TransferRequestUnitTest implements SumValidationUnitTest, AccountIdValidationUnitTest {
-    private AccountIdValidator<TransferRequest> accountIdValidator = new AccountIdValidator<>() {
+public class TransferMoneyRequestUnitTest implements SumValidationUnitTest, AccountIdValidationUnitTest {
+    private AccountIdValidator<TransferMoneyRequest> accountIdValidator = new AccountIdValidator<>() {
         @Override
-        protected Map<String, TransferRequest> buildRequest(Integer accountId) {
+        protected Map<String, TransferMoneyRequest> buildRequest(Integer accountId) {
             return Map.of(
-                    "fromAccountId", TransferRequest.builder().fromAccountId(accountId).build(),
-                    "toAccountId", TransferRequest.builder().toAccountId(accountId).build()
+                    "fromAccountId", TransferMoneyRequest.builder().fromAccountId(accountId).build(),
+                    "toAccountId", TransferMoneyRequest.builder().toAccountId(accountId).build()
             );
         }
     };
 
-    private SumValidator<TransferRequest> sumValidator = new SumValidator<>() {
+    private SumValidator<TransferMoneyRequest> sumValidator = new SumValidator<>() {
         @Override
-        protected TransferRequest buildRequest(BigDecimal sum) {
-            return TransferRequest.builder().sum(sum).build();
+        protected TransferMoneyRequest buildRequest(BigDecimal sum) {
+            return TransferMoneyRequest.builder().sum(sum).build();
         }
     };
 
