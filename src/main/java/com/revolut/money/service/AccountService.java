@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import com.revolut.money.model.generated.tables.pojos.Account;
 import com.revolut.money.model.generated.tables.records.AccountRecord;
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -14,21 +12,24 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.revolut.money.model.generated.tables.Account.ACCOUNT;
+import static java.util.Collections.emptyList;
 
 public class AccountService {
     static final String NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE = "Not enough money at account %s";
     static final String ACCOUNT_DOES_NOT_EXIST = "Account %s does not exist";
 
     private final DataSource dataSource;
+    private final DslContextBuilder dslContextBuilder;
 
     @Inject
-    public AccountService(DataSource dataSource) {
+    public AccountService(DataSource dataSource, DslContextBuilder dslContextBuilder) {
         this.dataSource = dataSource;
+        this.dslContextBuilder = dslContextBuilder;
     }
 
     public Account findAccount(Integer accountId) {
         try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            DSLContext dslContext = dslContextBuilder.buildDslContext(connection);
 
             AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
@@ -44,7 +45,7 @@ public class AccountService {
 
     public Account putMoney(Integer accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            DSLContext dslContext = dslContextBuilder.buildDslContext(connection);
 
             AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
@@ -69,7 +70,7 @@ public class AccountService {
 
     public Account withdrawMoney(Integer accountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            DSLContext dslContext = dslContextBuilder.buildDslContext(connection);
 
             AccountRecord accountRecord = dslContext.fetchOne(ACCOUNT, ACCOUNT.ID.eq(accountId));
 
@@ -100,27 +101,27 @@ public class AccountService {
 
     public List<Account> transferMoney(Integer fromAccountId, Integer toAccountId, BigDecimal sum) {
         try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
-
-            dslContext.select(ACCOUNT.BALANCE)
-                    .from(ACCOUNT).where(ACCOUNT.ID.eq(fromAccountId)).or(ACCOUNT.ID.eq(toAccountId))
-                    .forUpdate().fetch();
+            DSLContext dslContext = dslContextBuilder.buildDslContext(connection);
 
             BigDecimal firstAccountBalance = findAccount(fromAccountId).getBalance();
             BigDecimal secondAccountBalance = findAccount(toAccountId).getBalance();
 
             if (firstAccountBalance.compareTo(sum) >= 0) {
-                dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(sum))
+                int numberOfAffectedAccounts = dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(sum))
                         .where(ACCOUNT.ID.eq(fromAccountId)).and(ACCOUNT.BALANCE.eq(firstAccountBalance)).execute();
 
-                dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(sum))
-                        .where(ACCOUNT.ID.eq(toAccountId)).and(ACCOUNT.BALANCE.eq(secondAccountBalance)).execute();
+                if (numberOfAffectedAccounts > 0) {
+                    dslContext.update(ACCOUNT).set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(sum))
+                            .where(ACCOUNT.ID.eq(toAccountId)).and(ACCOUNT.BALANCE.eq(secondAccountBalance)).execute();
 
-                List<Account> accounts = dslContext.select().from(ACCOUNT).where(ACCOUNT.ID.eq(fromAccountId)).or(ACCOUNT.ID.eq(toAccountId))
-                        .fetchInto(Account.class);
+                    List<Account> updatedAccount = dslContext.select().from(ACCOUNT).where(ACCOUNT.ID.eq(fromAccountId)).or(ACCOUNT.ID.eq(toAccountId))
+                            .fetchInto(Account.class);
 
-                connection.commit();
-                return accounts;
+                    connection.commit();
+                    return updatedAccount;
+                }
+
+                return emptyList();
             } else {
                 throw new NotEnoughMoneyException(String.format(NOT_ENOUGH_MONEY_AT_ACCOUNT_MESSAGE, fromAccountId));
             }
@@ -131,7 +132,7 @@ public class AccountService {
 
     public Account createAccount() {
         try (Connection connection = dataSource.getConnection()) {
-            DSLContext dslContext = DSL.using(connection, SQLDialect.H2);
+            DSLContext dslContext = dslContextBuilder.buildDslContext(connection);
 
             Account account = dslContext.insertInto(ACCOUNT).defaultValues()
                     .returning().fetchOne().into(Account.class);
